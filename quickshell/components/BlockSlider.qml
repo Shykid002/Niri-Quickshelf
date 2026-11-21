@@ -34,7 +34,7 @@ Item {
 
     Bracket { active: area.containsMouse; color: Theme.muted }
 
-    MouseArea {
+    MouseArea { cursorShape: pressed ? Qt.ClosedHandCursor : Qt.PointingHandCursor;
         id: area
         anchors.fill: parent
         hoverEnabled: true

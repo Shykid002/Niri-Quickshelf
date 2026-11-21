@@ -3,3 +3,4 @@ color_scheme_path=__HOME__/.config/__QT__/colors/rice.conf
 custom_palette=true
 standard_dialogs=default
 style=Fusion
+icon_theme=Rice-Papirus

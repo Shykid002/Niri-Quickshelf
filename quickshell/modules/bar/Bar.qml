@@ -27,7 +27,7 @@ Variants {
             Txt { anchors.centerIn: parent; color: Theme.paper; font.pixelSize: 13
                   text: Niri.available ? Niri.focusedIndex : "–" }
             Bracket { active: wsArea.containsMouse; color: Theme.paper }
-            MouseArea { id: wsArea; anchors.fill: parent; hoverEnabled: true; onClicked: Niri.toggleOverview() }
+            MouseArea { cursorShape: Qt.PointingHandCursor; id: wsArea; anchors.fill: parent; hoverEnabled: true; onClicked: Niri.toggleOverview() }
         }
         Pills { anchors { left: wsBox.right; leftMargin: 11; verticalCenter: parent.verticalCenter } }
 
@@ -53,7 +53,7 @@ Variants {
                 Mono { text: Almanac.timeText; color: Theme.paper; font.pixelSize: 13; font.bold: true }
             }
             Bracket { active: clockArea.containsMouse; color: Theme.paper }
-            MouseArea { id: clockArea; anchors.fill: parent; hoverEnabled: true
+            MouseArea { cursorShape: Qt.PointingHandCursor; id: clockArea; anchors.fill: parent; hoverEnabled: true
                         onClicked: Drawer.toggle("day", win.screen) }
         }
 

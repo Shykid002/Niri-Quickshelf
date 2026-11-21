@@ -39,7 +39,7 @@ Item {
                       text: (Sessions.count > 1 ? Sessions.count : "I") + " working"; font.pixelSize: 12
                       color: tab.active ? Theme.paper : Theme.muted }
                 Bracket { active: tabArea.containsMouse && !tab.active; color: Theme.ink }
-                MouseArea { id: tabArea; anchors.fill: parent; hoverEnabled: true; onClicked: Drawer.tab = tab.modelData.id }
+                MouseArea { cursorShape: Qt.PointingHandCursor; id: tabArea; anchors.fill: parent; hoverEnabled: true; onClicked: Drawer.tab = tab.modelData.id }
             }
         }
     }

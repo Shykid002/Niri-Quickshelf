@@ -13,4 +13,4 @@ layout {
     insert-hint { color "__COVER__55"; }
 }
 overview { backdrop-color "#E2DCCF"; }
-cursor { xcursor-theme "rice-ink-dark"; xcursor-size 24; }
+cursor { xcursor-theme "__CURSOR__"; xcursor-size 24; }

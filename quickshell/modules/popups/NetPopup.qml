@@ -65,7 +65,7 @@ PopupFrame {
             anchors { right: tog.left; rightMargin: 14; verticalCenter: parent.verticalCenter }
             text: root.adapter && root.adapter.discovering ? "searching" : "search"
             color: Theme.muted; font.pixelSize: 12
-            MouseArea { anchors.fill: parent; anchors.margins: -6
+            MouseArea { cursorShape: Qt.PointingHandCursor; anchors.fill: parent; anchors.margins: -6
                         onClicked: root.adapter.discovering = !root.adapter.discovering }
         }
         SquareToggle {

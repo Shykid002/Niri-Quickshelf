@@ -45,7 +45,7 @@ PopupFrame {
             Txt { anchors { right: parent.right; rightMargin: 22; verticalCenter: parent.verticalCenter }
                   text: app.modelData.status === Status.NeedsAttention ? "attention" : app.modelData.status === Status.Active ? "active" : ""
                   color: app.modelData.status === Status.NeedsAttention ? Theme.red : Theme.muted; font.pixelSize: 12 }
-            MouseArea {
+            MouseArea { cursorShape: Qt.PointingHandCursor;
                 anchors.fill: parent; acceptedButtons: Qt.RightButton | Qt.MiddleButton
                 onClicked: mouse => {
                     if (mouse.button === Qt.RightButton) app.menu(mouse.x, mouse.y);

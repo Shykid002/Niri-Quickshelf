@@ -39,7 +39,7 @@ PopupFrame {
                 anchors { bottom: parent.bottom; bottomMargin: 16 }
                 Rectangle { anchors.fill: parent; color: Theme.rule }
                 Rectangle { width: parent.width * Math.max(0, Math.min(1, Audio.volume)); height: parent.height; color: Theme.ink }
-                MouseArea {
+                MouseArea { cursorShape: pressed ? Qt.ClosedHandCursor : Qt.PointingHandCursor;
                     anchors { fill: parent; topMargin: -8; bottomMargin: -8 }
                     function set(mx) { Audio.setVolume(mx / bar.width * 100) }
                     onPressed: mouse => set(mouse.x)

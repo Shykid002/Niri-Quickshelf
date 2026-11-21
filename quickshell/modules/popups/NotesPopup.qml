@@ -27,7 +27,7 @@ PopupFrame {
                     Txt { id: lbl; anchors.verticalCenter: parent.verticalCenter; text: act.modelData
                           color: act.off ? Theme.muted : Theme.ink }
                     Item { anchors { fill: parent; margins: -6 } Bracket { active: aArea.containsMouse && !act.off } }
-                    MouseArea {
+                    MouseArea { cursorShape: Qt.PointingHandCursor;
                         id: aArea; anchors.fill: parent; hoverEnabled: true
                         onClicked: {
                             if (act.modelData === "View") Drawer.openOn("day", Popups.screenName);

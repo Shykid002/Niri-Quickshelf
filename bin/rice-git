@@ -1,0 +1,25 @@
+#!/bin/sh
+# rice-git: one-line git summary for the prompt and the terminal title. Prints nothing outside a repo.
+#   main★ ↑1 ↓2 +3 ~4 ?5      ★ something is not committed   ↑ ahead   ↓ behind
+#                              + staged   ~ changed   ? untracked   ! conflicts
+export GIT_OPTIONAL_LOCKS=0
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
+git status --porcelain=v2 --branch 2>/dev/null | awk '
+/^# branch.oid/  { oid = substr($3, 1, 7) }
+/^# branch.head/ { branch = $3 }
+/^# branch.ab/   { ahead = substr($3, 2); behind = substr($4, 2) }
+/^[12] /         { if (substr($2, 1, 1) != ".") staged++; if (substr($2, 2, 1) != ".") changed++ }
+/^u /            { conflict++ }
+/^\? /           { untracked++ }
+END {
+  if (branch == "(detached)" || branch == "") branch = oid
+  out = branch
+  if (staged + changed + untracked + conflict > 0) out = out "★"
+  if (ahead > 0)     out = out " ↑" ahead
+  if (behind > 0)    out = out " ↓" behind
+  if (staged > 0)    out = out " +" staged
+  if (changed > 0)   out = out " ~" changed
+  if (untracked > 0) out = out " ?" untracked
+  if (conflict > 0)  out = out " !" conflict
+  print out
+}'

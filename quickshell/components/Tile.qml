@@ -31,5 +31,5 @@ Item {
     }
 
     Bracket { active: area.containsMouse; color: root.fg }
-    MouseArea { id: area; anchors.fill: parent; hoverEnabled: true; onClicked: root.clicked() }
+    MouseArea { cursorShape: Qt.PointingHandCursor; id: area; anchors.fill: parent; hoverEnabled: true; onClicked: root.clicked() }
 }

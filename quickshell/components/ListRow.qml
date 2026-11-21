@@ -15,5 +15,5 @@ Item {
         anchors { fill: parent; leftMargin: 12; rightMargin: 12; topMargin: 2; bottomMargin: 2 }
         Bracket { active: area.containsMouse }
     }
-    MouseArea { id: area; anchors.fill: parent; hoverEnabled: true; onClicked: root.clicked() }
+    MouseArea { cursorShape: Qt.PointingHandCursor; id: area; anchors.fill: parent; hoverEnabled: true; onClicked: root.clicked() }
 }

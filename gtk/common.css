@@ -1,10 +1,8 @@
 
-/* Flat and square, like the rest of the rice: no rounded corners, no shadows. */
+/* Flat and square, like the rest of the rice: no rounded corners, no shadows.
+   Only this. Earlier versions also drew borders around every view, card, entry and button,
+   which put a box around file names and list rows; those rules are gone. */
 * { border-radius: 0; box-shadow: none; }
 headerbar, .titlebar { border-bottom: 1px solid @headerbar_border_color; }
-.card, .boxed-list, list.boxed-list, .osd { border: 1px solid @card_shade_color; }
 popover > contents, popover.background > contents { border: 1px solid @popover_shade_color; }
-entry, spinbutton, .view { border: 1px solid @card_shade_color; }
 entry:focus-within, spinbutton:focus-within { border-color: @accent_bg_color; }
-button { border: 1px solid @card_shade_color; }
-button.suggested-action { border-color: @accent_bg_color; }

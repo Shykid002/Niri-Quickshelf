@@ -151,7 +151,7 @@ Item {
                 visible: Notifs.count > 0
                 anchors.right: parent.right
                 text: "Clear"; color: Theme.muted; font.pixelSize: 12
-                MouseArea { anchors { fill: parent; margins: -6 } onClicked: Notifs.clearAll() }
+                MouseArea { cursorShape: Qt.PointingHandCursor; anchors { fill: parent; margins: -6 } onClicked: Notifs.clearAll() }
             }
         }
         Txt { visible: Notifs.count === 0; width: parent.width; horizontalAlignment: Text.AlignHCenter; topPadding: 6

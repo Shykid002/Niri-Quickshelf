@@ -22,7 +22,7 @@ Item {
     }
     MouseArea {
         anchors.fill: parent
-        cursorShape: Qt.ArrowCursor
+        cursorShape: Qt.PointingHandCursor
         onClicked: { const v = !root.checked; if (root.selfToggle) root.checked = v; root.toggled(v) }
     }
 }

@@ -22,5 +22,5 @@ Item {
         width: parent.width; height: 22
         Bracket { active: root.hovered; color: root.tone }
     }
-    MouseArea { id: area; anchors.fill: parent; hoverEnabled: true; onClicked: root.clicked() }
+    MouseArea { cursorShape: Qt.PointingHandCursor; id: area; anchors.fill: parent; hoverEnabled: true; onClicked: root.clicked() }
 }

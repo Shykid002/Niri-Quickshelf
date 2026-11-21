@@ -19,7 +19,7 @@ Row {
                 color: pill.modelData.focused ? Theme.ink : pill.modelData.occupied ? Theme.muted : "transparent"
                 border { width: (pill.modelData.focused || pill.modelData.occupied) ? 0 : 1; color: Theme.muted }
             }
-            MouseArea { anchors.fill: parent; onClicked: Niri.focusWorkspace(pill.modelData.idx) }
+            MouseArea { cursorShape: Qt.PointingHandCursor; anchors.fill: parent; onClicked: Niri.focusWorkspace(pill.modelData.idx) }
         }
     }
 }

@@ -18,4 +18,8 @@ function fish_prompt
     set_color normal; echo -n " "
     set_color red; echo -n "■"
     set_color normal; echo -n " "
+
+    
+   alias vault-sync "cd ~/Obsidian; and git add .; and git commit -m 'vault sync'; git push origin main"
+
 end

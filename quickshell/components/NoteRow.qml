@@ -36,7 +36,7 @@ Item {
         anchors { fill: parent; leftMargin: Math.max(root.pad - 10, 0); rightMargin: Math.max(root.pad - 10, 0); topMargin: 2; bottomMargin: 2 }
         Bracket { active: root.hot }
     }
-    MouseArea { id: area; anchors.fill: parent; hoverEnabled: true; onClicked: root.expanded = !root.expanded }
+    MouseArea { cursorShape: Qt.PointingHandCursor; id: area; anchors.fill: parent; hoverEnabled: true; onClicked: root.expanded = !root.expanded }
 
     Mono {   // arrival time
         anchors { right: parent.right; rightMargin: Math.max(root.pad, 8); top: parent.top; topMargin: 9 }
@@ -47,6 +47,6 @@ Item {
         anchors { right: parent.right; rightMargin: Math.max(root.pad, 8); top: parent.top; topMargin: 8 }
         visible: root.hot
         text: "clear"; color: Theme.muted; font.pixelSize: 12
-        MouseArea { id: clearArea; anchors { fill: parent; margins: -6 } hoverEnabled: true; onClicked: root.note.dismiss() }
+        MouseArea { cursorShape: Qt.PointingHandCursor; id: clearArea; anchors { fill: parent; margins: -6 } hoverEnabled: true; onClicked: root.note.dismiss() }
     }
 }

@@ -12,10 +12,12 @@ fi
 if [ "$mode" = dark ]; then fg=171619; else case $cover in ochre) fg=1D1C1A;; *) fg=EEEAE1;; esac; fi
 rgb="$(printf '%d;%d;%d' 0x$(echo "$hex" | cut -c1-2) 0x$(echo "$hex" | cut -c3-4) 0x$(echo "$hex" | cut -c5-6))"
 root="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
-if [ "$mode" = dark ]; then name=ink;   cursor=rice-ink-light; else name=paper; cursor=rice-ink-dark; fi
+if [ "$mode" = dark ]; then name=ink; else name=paper; fi
+case $cover in indigo|ochre|pine) ckey=$cover;; *) ckey=red;; esac
+cursor="rice-$name-$ckey"          # e.g. rice-ink-pine: the cover colour is drawn into the pointer
 
 mkdir -p "$HOME/.config/niri"
-[ -f "$root/niri/$name.kdl" ] && sed "s/__COVER__/#$hex/g" "$root/niri/$name.kdl" > "$HOME/.config/niri/theme.kdl"
+[ -f "$root/niri/$name.kdl" ] && sed -e "s/__COVER__/#$hex/g" -e "s/__CURSOR__/$cursor/g" "$root/niri/$name.kdl" > "$HOME/.config/niri/theme.kdl"
 
 # kitty: copy the palette, then reload every running kitty
 mkdir -p "$HOME/.config/kitty" "$HOME/.config/zathura"
@@ -51,6 +53,17 @@ for q in qt6ct qt5ct; do
   sed -e "s/__COVER__/$hex/g" -e "s/__COVER_FG__/$fg/g" "$root/qt/rice-$name.conf" > "$HOME/.config/$q/colors/rice.conf"
   [ -f "$HOME/.config/$q/$q.conf" ] && touch "$HOME/.config/$q/$q.conf"
 done
+
+# Icons: Papirus folders in the cover colour (Rice-Papirus, built by bin/rice-icons). Skipped if Papirus is not installed.
+if "$root/bin/rice-icons" "$cover" "$mode" >/dev/null 2>&1; then
+  gsettings set org.gnome.desktop.interface icon-theme Rice-Papirus 2>/dev/null
+  for gv in 3.0 4.0; do setini "$HOME/.config/gtk-$gv/settings.ini" gtk-icon-theme-name Rice-Papirus; done
+  for q in qt6ct qt5ct; do
+    cf="$HOME/.config/$q/$q.conf"; [ -f "$cf" ] || continue
+    if grep -q '^icon_theme=' "$cf"; then sed -i 's|^icon_theme=.*|icon_theme=Rice-Papirus|' "$cf"
+    else sed -i '/^\[Appearance\]/a icon_theme=Rice-Papirus' "$cf"; fi
+  done
+fi
 
 # Firefox: the accent colour (light/dark flip by itself through prefers-color-scheme)
 "$root/bin/rice-firefox" cover "$cover" >/dev/null 2>&1

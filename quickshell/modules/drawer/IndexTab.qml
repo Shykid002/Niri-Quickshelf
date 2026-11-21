@@ -99,7 +99,7 @@ FocusScope {
                 anchors { fill: parent; leftMargin: 20; rightMargin: 20; topMargin: 1; bottomMargin: 1 }
                 Bracket { active: root.sel === row.index }
             }
-            MouseArea {
+            MouseArea { cursorShape: Qt.PointingHandCursor;
                 anchors.fill: parent; enabled: row.pick; hoverEnabled: true
                 onEntered: root.sel = row.index
                 onClicked: { root.sel = row.index; root.activate() }

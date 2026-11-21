@@ -82,7 +82,7 @@ FloatingWindow {
                     Txt { anchors.verticalCenter: parent.verticalCenter; text: cat.modelData[1]; font.pixelSize: 17
                           color: cat.sel ? Theme.ink : Theme.muted }
                     Item { anchors { fill: parent; topMargin: 12; bottomMargin: 12; rightMargin: 40 } Bracket { active: cat.sel } }
-                    MouseArea { anchors.fill: parent; onClicked: win.page = cat.modelData[0] }
+                    MouseArea { cursorShape: Qt.PointingHandCursor; anchors.fill: parent; onClicked: win.page = cat.modelData[0] }
                 }
             }
         }
@@ -112,7 +112,7 @@ FloatingWindow {
                                 Txt { id: label; anchors.verticalCenter: parent.verticalCenter; text: opt.modelData[1]
                                       font.pixelSize: 16; color: opt.sel ? Theme.ink : Theme.muted }
                                 Item { anchors { fill: parent; margins: -5 } Bracket { active: opt.sel } }
-                                MouseArea { anchors.fill: parent; onClicked: row.modelData.set(opt.modelData[0]) }
+                                MouseArea { cursorShape: Qt.PointingHandCursor; anchors.fill: parent; onClicked: row.modelData.set(opt.modelData[0]) }
                             }
                         }
                     }
@@ -136,7 +136,7 @@ FloatingWindow {
                                     }
                                 }
                                 Item { anchors { fill: parent; margins: -6 } Bracket { active: sw.sel } }
-                                MouseArea { anchors.fill: parent; onClicked: row.modelData.set(sw.modelData[0]) }
+                                MouseArea { cursorShape: Qt.PointingHandCursor; anchors.fill: parent; onClicked: row.modelData.set(sw.modelData[0]) }
                             }
                         }
                     }

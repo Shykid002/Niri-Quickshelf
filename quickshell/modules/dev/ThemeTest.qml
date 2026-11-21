@@ -11,7 +11,7 @@ FloatingWindow {
         implicitHeight: 360
         color: Theme.paper
 
-        MouseArea { anchors.fill: parent; onClicked: Theme.toggle() }
+        MouseArea { cursorShape: Qt.PointingHandCursor; anchors.fill: parent; onClicked: Theme.toggle() }
 
         Column {
             anchors { left: parent.left; top: parent.top; margins: 32 }

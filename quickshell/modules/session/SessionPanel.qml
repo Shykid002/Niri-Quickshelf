@@ -56,7 +56,7 @@ FocusScope {
                     anchors { fill: parent; margins: 8 }
                     Bracket { active: root.cur === tab.index; color: Theme.paper }
                 }
-                MouseArea {
+                MouseArea { cursorShape: Qt.PointingHandCursor;
                     anchors.fill: parent; hoverEnabled: true
                     onEntered: root.cur = tab.index
                     onClicked: root.run(tab.index)

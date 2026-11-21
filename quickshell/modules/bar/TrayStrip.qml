@@ -36,7 +36,7 @@ Item {
             kind: "tray"
             tone: root.open ? Theme.paper : Theme.ink
             anchors.verticalCenter: parent.verticalCenter
-            MouseArea {
+            MouseArea { cursorShape: Qt.PointingHandCursor;
                 anchors { fill: parent; margins: -8 }
                 onClicked: Popups.toggle("tray", root.window.screen, root.window.width - root.mapToItem(null, root.width, 0).x)
             }
@@ -62,7 +62,7 @@ Item {
                 }
                 Bracket { active: entryArea.containsMouse
                           anchors.fill: undefined; x: -4; y: 2.5; width: 24; height: 22 }
-                MouseArea {
+                MouseArea { cursorShape: Qt.PointingHandCursor;
                     id: entryArea
                     anchors.fill: parent
                     anchors.margins: -4

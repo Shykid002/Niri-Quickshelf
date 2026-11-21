@@ -52,7 +52,7 @@ Singleton {
     readonly property int    size:  15
 
     // ── cursor theme to use for the current mode ────────────
-    readonly property string cursorTheme: dark ? "rice-ink-light" : "rice-ink-dark"
+    readonly property string cursorTheme: "rice-" + (dark ? "ink" : "paper") + "-" + (["indigo", "ochre", "pine"].indexOf(Prefs.cover) >= 0 ? Prefs.cover : "red")
 
     // ── gsetting sync ───────────────────────────────────────
     // Switch right now (what the transition calls when the screen is covered).
