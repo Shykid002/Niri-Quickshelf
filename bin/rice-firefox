@@ -1,0 +1,34 @@
+#!/bin/sh
+# rice-firefox install        link the stylesheets into every Firefox profile, enable them, write the cover colour
+# rice-firefox cover NAME     only rewrite the cover colour (red | indigo | ochre | pine | mix)
+# Firefox reads these at start-up: restart it once after installing.
+root="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+cmd="${1:-install}"; cover="${2:-red}"
+case $cover in indigo) l=2C3E60; d=6D84AF;; ochre) l=CF9C42; d=D7AD59;; pine) l=486455; d=7C9987;; *) l=CA4C29; d=DE603B;; esac
+
+profiles() {
+  for base in "$HOME/.mozilla/firefox" "$HOME/.var/app/org.mozilla.firefox/.mozilla/firefox" "$HOME/snap/firefox/common/.mozilla/firefox"; do
+    [ -f "$base/profiles.ini" ] || continue
+    sed -n 's/^Path=//p' "$base/profiles.ini" | while read -r p; do
+      case $p in /*) [ -d "$p" ] && echo "$p";; *) [ -d "$base/$p" ] && echo "$base/$p";; esac
+    done
+  done
+}
+
+n=0
+profiles | while read -r prof; do
+  mkdir -p "$prof/chrome"
+  # write the cover colour on "cover", or on "install" only if there is none yet (install must not reset your choice)
+  if [ "$cmd" = cover ] || [ ! -f "$prof/chrome/rice-cover.css" ]; then
+    printf ':root { --rice-accent: #%s; }\n@media (prefers-color-scheme: dark) { :root { --rice-accent: #%s; } }\n' "$l" "$d" > "$prof/chrome/rice-cover.css"
+  fi
+  if [ "$cmd" = install ]; then
+    ln -sf "$root/firefox/userChrome.css"  "$prof/chrome/userChrome.css"
+    ln -sf "$root/firefox/userContent.css" "$prof/chrome/userContent.css"
+    # managed block in user.js (replaced, never duplicated)
+    [ -f "$prof/user.js" ] && sed -i '/^\/\/ rice-begin/,/^\/\/ rice-end/d' "$prof/user.js"
+    { echo "// rice-begin"; cat "$root/firefox/user.js"; echo "// rice-end"; } >> "$prof/user.js"
+  fi
+  echo "firefox profile: $prof"
+done
+exit 0

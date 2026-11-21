@@ -1,0 +1,9 @@
+/* Paper & ink for Firefox's own pages (new tab, about:...). Web sites are left alone. */
+@-moz-document url("about:home"), url("about:newtab"), url("about:blank"), url-prefix("about:preferences"), url-prefix("about:addons") {
+  :root { --rice-paper: #EEEAE1; --rice-ink: #1D1C1A; --rice-block: #E2DCCF; }
+  @media (prefers-color-scheme: dark) { :root { --rice-paper: #171619; --rice-ink: #E7E2D5; --rice-block: #222023; } }
+  :root, body { --newtab-background-color: var(--rice-paper) !important; --newtab-text-primary-color: var(--rice-ink) !important;
+                --in-content-page-background: var(--rice-paper) !important; --in-content-page-color: var(--rice-ink) !important;
+                --in-content-box-background: var(--rice-block) !important; }
+  body { background: var(--rice-paper) !important; color: var(--rice-ink) !important; }
+}

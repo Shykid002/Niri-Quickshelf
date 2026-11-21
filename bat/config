@@ -1,0 +1,3 @@
+# ANSI theme: bat uses the terminal palette, so it flips with Ghostty.
+--theme="ansi"
+--style="numbers"

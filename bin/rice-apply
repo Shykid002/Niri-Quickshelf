@@ -1,0 +1,29 @@
+#!/bin/sh
+# rice-apply GAPS BORDER TAP NATURAL FONT   ("-" = leave unset)
+# Writes small fragments that niri and Ghostty include, then reloads niri.
+gaps="${1:--}" border="${2:--}" tap="${3:-0}" natural="${4:-0}" font="${5:--}"
+n="$HOME/.config/niri"; g="$HOME/.config/ghostty"; mkdir -p "$n" "$g"
+
+{
+  echo "// written by rice-apply. Settings > Windows"
+  echo "layout {"
+  case $gaps in none) echo "    gaps 0";; small) echo "    gaps 8";; usual) echo "    gaps 16";; esac
+  case $border in thin) echo "    border { width 1 }";; usual) echo "    border { width 2 }";; thick) echo "    border { width 3 }";; esac
+  echo "}"
+} > "$n/rice-layout.kdl"
+
+{
+  echo "// written by rice-apply. Settings > Input"
+  echo "input {"; echo "    touchpad {"
+  [ "$tap" = 1 ] && echo "        tap"
+  [ "$natural" = 1 ] && echo "        natural-scroll"
+  echo "    }"; echo "}"
+} > "$n/rice-input.kdl"
+
+{
+  echo "# written by rice-apply. Settings > Terminal"
+  case $font in small) echo "font-size = 12";; usual) echo "font-size = 13";; large) echo "font-size = 15";; esac
+} > "$g/rice.conf"
+
+[ -n "$NIRI_SOCKET" ] && niri msg action load-config-file >/dev/null 2>&1
+exit 0

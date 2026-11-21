@@ -1,0 +1,23 @@
+# rice-ink: generated from the reference frames
+background = 171619
+foreground = E7E2D5
+cursor-color = DE603B
+cursor-text = 171619
+selection-background = 222023
+selection-foreground = E7E2D5
+palette = 0=#222023
+palette = 1=#de603b
+palette = 2=#7c9987
+palette = 3=#d7ad59
+palette = 4=#6d84af
+palette = 5=#b58199
+palette = 6=#6b9ea5
+palette = 7=#cac2b4
+palette = 8=#8f8a80
+palette = 9=#e07757
+palette = 10=#8fa695
+palette = 11=#dab76f
+palette = 12=#8395b6
+palette = 13=#be92a4
+palette = 14=#81aaae
+palette = 15=#e7e2d5

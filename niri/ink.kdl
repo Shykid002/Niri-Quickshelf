@@ -1,0 +1,16 @@
+// ink  (written to ~/.config/niri/theme.kdl by bin/rice-theme)
+layout {
+    background-color "transparent"
+    border {
+        active-color "#E7E2D5"
+        inactive-color "#3A3636"
+        urgent-color "#DE603B"
+    }
+    tab-indicator {
+        active-color "__COVER__"
+        inactive-color "#3A3636"
+    }
+    insert-hint { color "__COVER__55"; }
+}
+overview { backdrop-color "#222023"; }
+cursor { xcursor-theme "rice-ink-light"; xcursor-size 24; }

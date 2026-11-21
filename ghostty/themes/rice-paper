@@ -1,0 +1,23 @@
+# rice-paper: generated from the reference frames
+background = EEEAE1
+foreground = 1D1C1A
+cursor-color = CA4C29
+cursor-text = EEEAE1
+selection-background = E2DCCF
+selection-foreground = 1D1C1A
+palette = 0=#1e1c1a
+palette = 1=#bd4525
+palette = 2=#486455
+palette = 3=#9f711c
+palette = 4=#2b3e60
+palette = 5=#7f465c
+palette = 6=#2b6169
+palette = 7=#d0c6b6
+palette = 8=#8a8478
+palette = 9=#c66347
+palette = 10=#667c6e
+palette = 11=#ad873f
+palette = 12=#4e5d77
+palette = 13=#936474
+palette = 14=#4e7a7f
+palette = 15=#eeeae1

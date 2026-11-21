@@ -1,0 +1,36 @@
+# yazi for the rice. Only ANSI colour names are used, so it follows kitty / Ghostty live
+# when the theme flips. The selected row is a reversed bar: black on cream in paper, cream on black in ink.
+[mgr]
+cwd             = { fg = "reset", bold = true }
+hovered         = { reversed = true }
+preview_hovered = { underline = true }
+find_keyword    = { fg = "red", bold = true }
+find_position   = { fg = "red" }
+marker_selected = { fg = "green", reversed = true }
+marker_copied   = { fg = "yellow", reversed = true }
+marker_cut      = { fg = "red", reversed = true }
+border_symbol   = "│"
+border_style    = { fg = "darkgray" }
+
+[tabs]
+active   = { reversed = true, bold = true }
+inactive = { fg = "darkgray" }
+
+[mode]
+normal_main = { reversed = true, bold = true }
+normal_alt  = { fg = "darkgray" }
+select_main = { fg = "reset", bg = "green", bold = true }
+unset_main  = { fg = "reset", bg = "red", bold = true }
+
+[status]
+overall = { }
+sep_left  = { open = "", close = "" }
+sep_right = { open = "", close = "" }
+
+[filetype]
+rules = [
+    { url = "*/", fg = "blue" },
+    { url = "*", is = "exec", fg = "green" },
+    { url = "*", is = "link", fg = "cyan" },
+    { url = "*", fg = "reset" },
+]

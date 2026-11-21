@@ -1,0 +1,11 @@
+# Example Ghostty config for the rice. Ghostty switches theme by itself when the
+# system colour-scheme gsetting changes, which is what the shell's toggle writes.
+theme = light:rice-paper,dark:rice-ink
+font-family = Courier Prime
+font-size = 13
+cursor-style = block
+cursor-style-blink = false
+window-decoration = false
+window-padding-x = 14
+window-padding-y = 12
+background-opacity = 1

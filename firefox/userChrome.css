@@ -1,0 +1,63 @@
+/* Paper & ink for Firefox. The palette flips with the system colour scheme (it follows the
+   GTK / portal setting that the rice's theme switch writes). Accent comes from rice-cover.css,
+   which bin/rice-firefox writes. Firefox must use "System theme - auto" (Add-ons > Themes). */
+@import url("rice-cover.css");
+
+:root {
+  --rice-paper: #EEEAE1; --rice-block: #E2DCCF; --rice-ink: #1D1C1A; --rice-muted: #8A8478; --rice-rule: #C8C0B1;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --rice-paper: #171619; --rice-block: #222023; --rice-ink: #E7E2D5; --rice-muted: #8F8A80; --rice-rule: #3A3636; }
+}
+
+:root {
+  --toolbar-bgcolor: var(--rice-paper) !important;
+  --toolbar-color: var(--rice-ink) !important;
+  --lwt-accent-color: var(--rice-paper) !important;
+  --lwt-text-color: var(--rice-ink) !important;
+  --toolbar-field-background-color: var(--rice-block) !important;
+  --toolbar-field-color: var(--rice-ink) !important;
+  --toolbar-field-focus-background-color: var(--rice-paper) !important;
+  --toolbar-field-focus-color: var(--rice-ink) !important;
+  --toolbar-field-focus-border-color: var(--rice-accent) !important;
+  --urlbar-box-bgcolor: var(--rice-block) !important;
+  --urlbar-box-hover-bgcolor: var(--rice-block) !important;
+  --tab-selected-bgcolor: var(--rice-block) !important;
+  --tab-selected-textcolor: var(--rice-ink) !important;
+  --tab-loading-fill: var(--rice-accent) !important;
+  --arrowpanel-background: var(--rice-paper) !important;
+  --arrowpanel-color: var(--rice-ink) !important;
+  --arrowpanel-border-color: var(--rice-rule) !important;
+  --sidebar-background-color: var(--rice-block) !important;
+  --sidebar-text-color: var(--rice-ink) !important;
+  --lwt-sidebar-background-color: var(--rice-block) !important;
+  --lwt-sidebar-text-color: var(--rice-ink) !important;
+  --focus-outline-color: var(--rice-accent) !important;
+  --tab-border-radius: 0 !important;
+  --toolbarbutton-border-radius: 0 !important;
+  --urlbar-border-radius: 0 !important;
+  --arrowpanel-border-radius: 0 !important;
+  --border-radius-small: 0 !important;
+  --border-radius-medium: 0 !important;
+}
+
+#navigator-toolbox { background: var(--rice-paper) !important; border-bottom: 1px solid var(--rice-rule) !important; }
+#TabsToolbar, #nav-bar, #PersonalToolbar, #toolbar-menubar { background: var(--rice-paper) !important; box-shadow: none !important; }
+
+/* tabs: flat, the chosen one gets a cover-colour line on top */
+.tabbrowser-tab .tab-background { border-radius: 0 !important; box-shadow: none !important; }
+.tabbrowser-tab[selected] .tab-background { background: var(--rice-block) !important; border-top: 2px solid var(--rice-accent) !important; }
+.tab-label { color: var(--rice-ink) !important; }
+
+/* address bar and search */
+#urlbar-background, #searchbar { border-radius: 0 !important; border: 1px solid var(--rice-rule) !important; box-shadow: none !important; }
+#urlbar[focused] > #urlbar-background, #searchbar:focus-within { border-color: var(--rice-accent) !important; }
+.urlbarView { border-radius: 0 !important; }
+
+/* buttons, menus, panels: square, no shadows */
+toolbarbutton, .toolbarbutton-1, .urlbar-icon { border-radius: 0 !important; }
+panel, menupopup, .panel-arrowcontent { --panel-border-radius: 0px; border-radius: 0 !important; box-shadow: none !important; }
+menupopup { border: 1px solid var(--rice-rule) !important; }
+
+/* the rice's serif for the browser's own text */
+#navigator-toolbox, menupopup, panel, #sidebar-box { font-family: "EB Garamond", serif !important; }

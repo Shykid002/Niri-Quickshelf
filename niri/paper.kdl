@@ -1,0 +1,16 @@
+// paper  (written to ~/.config/niri/theme.kdl by bin/rice-theme)
+layout {
+    background-color "transparent"
+    border {
+        active-color "#1D1C1A"
+        inactive-color "#C8C0B1"
+        urgent-color "#C0402B"
+    }
+    tab-indicator {
+        active-color "__COVER__"
+        inactive-color "#C8C0B1"
+    }
+    insert-hint { color "__COVER__55"; }
+}
+overview { backdrop-color "#E2DCCF"; }
+cursor { xcursor-theme "rice-ink-dark"; xcursor-size 24; }

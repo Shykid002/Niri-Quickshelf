@@ -1,0 +1,67 @@
+#!/bin/sh
+# rice-theme dark|light [cover] : flip everything outside the shell (cursor, niri, kitty, fastfetch, GTK cursor).
+# cover = red|indigo|ochre|pine|mix (the cover colour from Settings; mix uses red outside the wallpaper)
+# Ghostty follows the colour-scheme gsetting by itself. Safe to run on any compositor.
+mode="${1:-light}"
+cover="${2:-red}"
+if [ "$mode" = dark ]; then
+  case $cover in indigo) hex=6D84AF;; ochre) hex=D7AD59;; pine) hex=7C9987;; *) hex=DE603B;; esac
+else
+  case $cover in indigo) hex=2C3E60;; ochre) hex=CF9C42;; pine) hex=486455;; *) hex=CA4C29;; esac
+fi
+if [ "$mode" = dark ]; then fg=171619; else case $cover in ochre) fg=1D1C1A;; *) fg=EEEAE1;; esac; fi
+rgb="$(printf '%d;%d;%d' 0x$(echo "$hex" | cut -c1-2) 0x$(echo "$hex" | cut -c3-4) 0x$(echo "$hex" | cut -c5-6))"
+root="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+if [ "$mode" = dark ]; then name=ink;   cursor=rice-ink-light; else name=paper; cursor=rice-ink-dark; fi
+
+mkdir -p "$HOME/.config/niri"
+[ -f "$root/niri/$name.kdl" ] && sed "s/__COVER__/#$hex/g" "$root/niri/$name.kdl" > "$HOME/.config/niri/theme.kdl"
+
+# kitty: copy the palette, then reload every running kitty
+mkdir -p "$HOME/.config/kitty" "$HOME/.config/zathura"
+[ -f "$root/kitty/rice-$name.conf" ] && sed -e "s/^cursor #.*/cursor #$hex/" -e "s/^url_color #.*/url_color #$hex/" \
+  "$root/kitty/rice-$name.conf" > "$HOME/.config/kitty/theme.conf"
+pkill -USR1 -x kitty 2>/dev/null
+# zathura: new windows pick this up
+[ -f "$root/zathura/$name" ] && cp "$root/zathura/$name" "$HOME/.config/zathura/theme"
+
+# fastfetch: generated from the template (only if the file is ours, a symlink, or missing)
+ff="$HOME/.config/fastfetch/config.jsonc"
+if [ -f "$root/fastfetch/config.jsonc.in" ] && { [ ! -e "$ff" ] || [ -L "$ff" ] || grep -q "paper & ink rice" "$ff" 2>/dev/null; }; then
+  mkdir -p "$HOME/.config/fastfetch"; rm -f "$ff"
+  sed "s/__COVER_RGB__/$rgb/" "$root/fastfetch/config.jsonc.in" > "$ff"
+fi
+
+# GTK 3 + 4: adw-gtk3 / libadwaita colours (named-colour overrides) and settings
+setini() { _f="$1"; _k="$2"; _v="$3"; [ -f "$_f" ] || printf '[Settings]\n' > "$_f"
+           if grep -q "^$_k=" "$_f"; then sed -i "s|^$_k=.*|$_k=$_v|" "$_f"; else printf '%s=%s\n' "$_k" "$_v" >> "$_f"; fi; }
+if [ "$mode" = dark ]; then gtktheme=adw-gtk3-dark; preferdark=1; else gtktheme=adw-gtk3; preferdark=0; fi
+for gv in 3.0 4.0; do
+  mkdir -p "$HOME/.config/gtk-$gv"
+  { sed -e "s/__COVER__/#$hex/g" -e "s/__COVER_FG__/#$fg/g" "$root/gtk/$name.css"; cat "$root/gtk/common.css"; } > "$HOME/.config/gtk-$gv/gtk.css"
+  setini "$HOME/.config/gtk-$gv/settings.ini" gtk-theme-name "$gtktheme"
+  setini "$HOME/.config/gtk-$gv/settings.ini" gtk-application-prefer-dark-theme "$preferdark"
+  setini "$HOME/.config/gtk-$gv/settings.ini" gtk-cursor-theme-name "$cursor"
+done
+gsettings set org.gnome.desktop.interface gtk-theme "$gtktheme" 2>/dev/null
+
+# Qt (qt6ct / qt5ct): palette file; touching the config makes running apps re-read it
+for q in qt6ct qt5ct; do
+  mkdir -p "$HOME/.config/$q/colors"
+  sed -e "s/__COVER__/$hex/g" -e "s/__COVER_FG__/$fg/g" "$root/qt/rice-$name.conf" > "$HOME/.config/$q/colors/rice.conf"
+  [ -f "$HOME/.config/$q/$q.conf" ] && touch "$HOME/.config/$q/$q.conf"
+done
+
+# Firefox: the accent colour (light/dark flip by itself through prefers-color-scheme)
+"$root/bin/rice-firefox" cover "$cover" >/dev/null 2>&1
+
+# apps that read the "default" cursor theme or the environment
+mkdir -p "$HOME/.local/share/icons/default"
+printf '[Icon Theme]\nName=Default\nInherits=%s\n' "$cursor" > "$HOME/.local/share/icons/default/index.theme"
+systemctl --user set-environment XCURSOR_THEME="$cursor" 2>/dev/null
+dbus-update-activation-environment --systemd XCURSOR_THEME="$cursor" 2>/dev/null
+
+gsettings set org.gnome.desktop.interface cursor-theme "$cursor" 2>/dev/null
+gsettings set org.gnome.desktop.interface cursor-size 24 2>/dev/null
+[ -n "$NIRI_SOCKET" ] && niri msg action load-config-file >/dev/null 2>&1
+exit 0

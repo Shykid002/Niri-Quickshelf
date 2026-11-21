@@ -1,0 +1,158 @@
+// niri config for the paper & ink rice (MacBook Air 2017, 1440x900).
+// Colours, gaps, borders, touchpad, cursor and keybinds live in the files included at the
+// bottom. The rice writes them, so Settings and the theme switch can change them live.
+// niri docs: https://niri-wm.github.io/niri/
+
+input {
+    keyboard {
+        xkb { }          // empty = use the system keymap (localectl set-x11-keymap)
+        numlock
+    }
+    // touchpad: Settings > Input  (rice-input.kdl)
+}
+
+layout {
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+    default-column-width { proportion 0.5; }
+
+    // Flat and square: no focus ring, a thin border, no shadows.
+    // Border colours: theme.kdl.  Border width and gaps: rice-layout.kdl.
+    focus-ring { 
+    	off
+	}
+    border { 
+    	width 2;
+	}
+}
+
+environment {
+    QT_QPA_PLATFORMTHEME "qt6ct"    // Qt apps read their palette from qt6ct (written by the theme switch)
+}
+
+prefer-no-csd                       // apps drop their own title bars and rounded corners
+
+hotkey-overlay { skip-at-startup }
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
+// The shell: bar, wallpaper, launcher, lock, notifications.
+spawn-at-startup "qs" "-c" "rice"
+
+// ── window rules ────────────────────────────────────────────
+window-rule {                       // Settings and Keybindings open as small floating windows
+    match title="^Settings$"
+    match title="^Keybindings$"
+    open-floating true
+}
+window-rule {                       // Firefox picture-in-picture
+    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    open-floating true
+}
+
+// The wallpaper also shows behind the workspaces in the overview.
+layer-rule {
+    match namespace="^rice-wallpaper$"
+    place-within-backdrop true
+}
+
+// ── keys ────────────────────────────────────────────────────
+// Shell keys (launcher, lock, theme, volume, light) are in keybinds.kdl.
+binds {
+    Mod+Shift+Slash { show-hotkey-overlay; }
+
+    Mod+T      hotkey-overlay-title="Terminal: kitty" { spawn "kitty"; }
+    Mod+Return hotkey-overlay-title="Terminal: kitty" { spawn "kitty"; }
+
+    Mod+O repeat=false { toggle-overview; }
+    Mod+Q repeat=false { close-window; }
+
+    // move focus
+    Mod+Left  { focus-column-left; }
+    Mod+Down  { focus-window-down; }
+    Mod+Up    { focus-window-up; }
+    Mod+Right { focus-column-right; }
+    Mod+H     { focus-column-left; }
+    Mod+J     { focus-window-down; }
+    Mod+K     { focus-window-up; }
+    Mod+L     { focus-column-right; }
+    Mod+Home  { focus-column-first; }
+    Mod+End   { focus-column-last; }
+
+    // move windows
+    Mod+Ctrl+Left  { move-column-left; }
+    Mod+Ctrl+Down  { move-window-down; }
+    Mod+Ctrl+Up    { move-window-up; }
+    Mod+Ctrl+Right { move-column-right; }
+    Mod+Ctrl+H     { move-column-left; }
+    Mod+Ctrl+J     { move-window-down; }
+    Mod+Ctrl+K     { move-window-up; }
+    Mod+Ctrl+L     { move-column-right; }
+
+    // workspaces (the pills in the bar)
+    Mod+Page_Down { focus-workspace-down; }
+    Mod+Page_Up   { focus-workspace-up; }
+    Mod+U         { focus-workspace-down; }
+    Mod+I         { focus-workspace-up; }
+    Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
+    Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
+    Mod+Ctrl+U         { move-column-to-workspace-down; }
+    Mod+Ctrl+I         { move-column-to-workspace-up; }
+    Mod+Shift+Page_Down { move-workspace-down; }
+    Mod+Shift+Page_Up   { move-workspace-up; }
+
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+Ctrl+1 { move-column-to-workspace 1; }
+    Mod+Ctrl+2 { move-column-to-workspace 2; }
+    Mod+Ctrl+3 { move-column-to-workspace 3; }
+    Mod+Ctrl+4 { move-column-to-workspace 4; }
+    Mod+Ctrl+5 { move-column-to-workspace 5; }
+    Mod+Ctrl+6 { move-column-to-workspace 6; }
+    Mod+Ctrl+7 { move-column-to-workspace 7; }
+    Mod+Ctrl+8 { move-column-to-workspace 8; }
+    Mod+Ctrl+9 { move-column-to-workspace 9; }
+
+    // columns and sizes
+    Mod+BracketLeft  { consume-or-expel-window-left; }
+    Mod+BracketRight { consume-or-expel-window-right; }
+    Mod+Comma  { consume-window-into-column; }
+    Mod+Period { expel-window-from-column; }
+    Mod+R       { switch-preset-column-width; }
+    Mod+Shift+R { switch-preset-column-width-back; }
+    Mod+F       { maximize-column; }
+    Mod+Shift+F { fullscreen-window; }
+    Mod+M       { maximize-window-to-edges; }
+    Mod+C       { center-column; }
+    Mod+Minus   { set-column-width "-10%"; }
+    Mod+Equal   { set-column-width "+10%"; }
+    Mod+Shift+Minus { set-window-height "-10%"; }
+    Mod+Shift+Equal { set-window-height "+10%"; }
+    Mod+V       { toggle-window-floating; }
+    Mod+Shift+V { switch-focus-between-floating-and-tiling; }
+    Mod+W       { toggle-column-tabbed-display; }
+
+    Print      { screenshot; }
+    Ctrl+Print { screenshot-screen; }
+    Alt+Print  { screenshot-window; }
+
+    Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+    Mod+Shift+E     { quit; }
+    Ctrl+Alt+Delete { quit; }
+    Mod+Shift+P     { power-off-monitors; }
+}
+
+// ── the rice (written and updated by the shell, do not edit those files) ──
+include "theme.kdl"
+include "rice-layout.kdl"
+include "rice-input.kdl"
+include "keybinds.kdl"

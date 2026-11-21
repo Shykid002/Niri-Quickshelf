@@ -1,0 +1,37 @@
+// Keybinds for the rice, included from config.kdl. Mod is the Super key.
+// niri refuses a key bound twice, so none of these may appear in config.kdl.
+// The shell must be running as the "rice" config (config.kdl starts it with: qs -c rice).
+
+binds {
+    // ── shell ──
+    Mod+Space       hotkey-overlay-title="Launcher"       { spawn "qs" "-c" "rice" "ipc" "call" "drawer" "index"; }
+    Mod+D           hotkey-overlay-title="Launcher"       { spawn "qs" "-c" "rice" "ipc" "call" "drawer" "index"; }
+    Mod+Shift+Space hotkey-overlay-title="Day drawer"     { spawn "qs" "-c" "rice" "ipc" "call" "drawer" "day"; }
+    Super+Alt+L     hotkey-overlay-title="Lock"           { spawn "qs" "-c" "rice" "ipc" "call" "lock" "lock"; }
+    Mod+Shift+T     hotkey-overlay-title="Paper / ink"    { spawn "qs" "-c" "rice" "ipc" "call" "theme" "toggle"; }
+    Mod+Slash       hotkey-overlay-title="Keybindings"    { spawn "qs" "-c" "rice" "ipc" "call" "keys" "toggle"; }
+    Mod+S           hotkey-overlay-title="Settings"       { spawn "qs" "-c" "rice" "ipc" "call" "settings" "open"; }
+
+    // ── sound and light (also while locked) ──
+    XF86AudioRaiseVolume  allow-when-locked=true { spawn "qs" "-c" "rice" "ipc" "call" "volume" "up"; }
+    XF86AudioLowerVolume  allow-when-locked=true { spawn "qs" "-c" "rice" "ipc" "call" "volume" "down"; }
+    XF86AudioMute         allow-when-locked=true { spawn "qs" "-c" "rice" "ipc" "call" "volume" "mute"; }
+    XF86MonBrightnessUp   allow-when-locked=true { spawn "qs" "-c" "rice" "ipc" "call" "brightness" "up"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "qs" "-c" "rice" "ipc" "call" "brightness" "down"; }
+
+    // ── media player (any MPRIS player: Spotify, Firefox, mpv...) ──
+    XF86AudioPlay allow-when-locked=true { spawn "qs" "-c" "rice" "ipc" "call" "player" "toggle"; }
+    XF86AudioNext allow-when-locked=true { spawn "qs" "-c" "rice" "ipc" "call" "player" "next"; }
+    XF86AudioPrev allow-when-locked=true { spawn "qs" "-c" "rice" "ipc" "call" "player" "previous"; }
+
+    // ── keyboard light, keyboard layout, screenshot ──
+    // MacBook Air 2017 keyboard backlight (brightnessctl, as in your config)
+    XF86KbdBrightnessUp allow-when-locked=true {
+        spawn "brightnessctl" "-d" "smc::kbd_backlight" "set" "+10%";
+    }
+    XF86KbdBrightnessDown allow-when-locked=true {
+        spawn "brightnessctl" "-d" "smc::kbd_backlight" "set" "10%-";
+    }
+    Mod+Alt+Space   hotkey-overlay-title="Next keyboard layout" { switch-layout "next"; }
+    Mod+Shift+S     hotkey-overlay-title="Screenshot: region"   { screenshot; }
+}

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Settings
+Comment=Paper and ink settings
+Exec=qs -c rice ipc call settings open
+Icon=preferences-system
+Terminal=false
+Categories=Settings;

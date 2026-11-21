@@ -1,0 +1,192 @@
+#!/usr/bin/env python3
+"""rice-keys: read niri's config (and every file it includes) and print all keybindings as JSON.
+Used by the Keybindings window (Mod+/). Reads ~/.config/niri/config.kdl, or the path given as $1."""
+import json, os, re, sys
+
+# ── tiny KDL helpers: strings and comments are handled, nothing else is interpreted ──
+def skip_string(t, i):
+    """if a string starts at t[i], return the index just after it, else None"""
+    if t.startswith('r#"', i) or t.startswith('r"', i):
+        j = t.index('"', i); end = '"' + t[i + 1:j]
+        k = t.find(end, j + 1)
+        return len(t) if k < 0 else k + len(end)
+    if t[i] == '"':
+        j = i + 1
+        while j < len(t) and t[j] != '"':
+            j += 2 if t[j] == '\\' else 1
+        return j + 1
+    return None
+
+def clean(t):
+    out, i = [], 0
+    while i < len(t):
+        s = skip_string(t, i)
+        if s is not None: out.append(t[i:s]); i = s
+        elif t.startswith('//', i):
+            j = t.find('\n', i); i = len(t) if j < 0 else j
+        elif t.startswith('/*', i):
+            j = t.find('*/', i); i = len(t) if j < 0 else j + 2
+        else: out.append(t[i]); i += 1
+    return ''.join(out)
+
+def match_brace(t, i):
+    depth, j = 0, i
+    while j < len(t):
+        s = skip_string(t, j)
+        if s is not None: j = s; continue
+        if t[j] == '{': depth += 1
+        elif t[j] == '}':
+            depth -= 1
+            if depth == 0: return j + 1
+        j += 1
+    return len(t)
+
+def binds_blocks(t):
+    j, depth, found = 0, 0, []
+    while j < len(t):
+        s = skip_string(t, j)
+        if s is not None: j = s; continue
+        if depth == 0 and (j == 0 or t[j - 1] in ' \t\r\n;') and re.match(r'binds\s*\{', t[j:]):
+            b = t.index('{', j); e = match_brace(t, b); found.append(t[b + 1:e - 1]); j = e; continue
+        if t[j] == '{': depth += 1
+        elif t[j] == '}': depth -= 1
+        j += 1
+    return found
+
+def entries(c):
+    i, res = 0, []
+    while i < len(c):
+        while i < len(c) and c[i] in ' \t\r\n;': i += 1
+        if i >= len(c): break
+        slash = c.startswith('/-', i)
+        if slash:
+            i += 2
+            while i < len(c) and c[i] in ' \t': i += 1
+        j = i
+        while j < len(c) and not c[j].isspace() and c[j] != '{': j += 1
+        key, k = c[i:j], j
+        while k < len(c) and c[k] != '{':
+            s = skip_string(c, k); k = s if s is not None else k + 1
+        if k >= len(c): break
+        end = match_brace(c, k)
+        if not slash: res.append((key, c[j:k], c[k + 1:end - 1]))
+        i = end
+    return res
+
+TOK = re.compile(r'"(?:[^"\\]|\\.)*"|[^\s;]+')
+def unq(s): return s[1:-1].replace('\\"', '"').replace('\\\\', '\\') if s.startswith('"') else s
+
+# ── names ──
+MODS = {'Mod': 'Super', 'Super': 'Super', 'Win': 'Super', 'Ctrl': 'Ctrl', 'Control': 'Ctrl', 'Alt': 'Alt',
+        'Shift': 'Shift', 'ISO_Level3_Shift': 'AltGr', 'ISO_Level5_Shift': 'Level5'}
+KEYS = {'Slash': '/', 'Comma': ',', 'Period': '.', 'Minus': '-', 'Equal': '=', 'Return': 'Enter', 'Left': '←',
+        'Right': '→', 'Up': '↑', 'Down': '↓', 'BracketLeft': '[', 'BracketRight': ']', 'Page_Down': 'PgDn',
+        'Page_Up': 'PgUp', 'Print': 'PrtSc', 'Escape': 'Esc', 'Delete': 'Del', 'Grave': '`', 'Semicolon': ';',
+        'WheelScrollDown': 'Scroll ↓', 'WheelScrollUp': 'Scroll ↑', 'WheelScrollLeft': 'Scroll ←',
+        'WheelScrollRight': 'Scroll →', 'TouchpadScrollDown': 'Touchpad ↓', 'TouchpadScrollUp': 'Touchpad ↑',
+        'XF86AudioRaiseVolume': 'Volume +', 'XF86AudioLowerVolume': 'Volume −', 'XF86AudioMute': 'Mute',
+        'XF86AudioMicMute': 'Mic mute', 'XF86AudioPlay': 'Play/Pause', 'XF86AudioStop': 'Stop',
+        'XF86AudioPrev': 'Previous', 'XF86AudioNext': 'Next', 'XF86MonBrightnessUp': 'Light +',
+        'XF86MonBrightnessDown': 'Light −', 'XF86KbdBrightnessUp': 'Keys light +',
+        'XF86KbdBrightnessDown': 'Keys light −'}
+def pretty_key(k):
+    parts = k.split('+'); return ' + '.join([MODS.get(p, p) for p in parts[:-1]] + [KEYS.get(parts[-1], parts[-1])])
+
+IPC = {('drawer', 'index'): 'Launcher', ('drawer', 'day'): 'Day drawer', ('lock', 'lock'): 'Lock the screen',
+       ('theme', 'toggle'): 'Switch paper / ink', ('settings', 'open'): 'Settings',
+       ('keys', 'toggle'): 'This list of keybindings', ('volume', 'up'): 'Volume up', ('volume', 'down'): 'Volume down',
+       ('volume', 'mute'): 'Mute', ('brightness', 'up'): 'Screen light up', ('brightness', 'down'): 'Screen light down',
+       ('keyboard', 'up'): 'Keyboard light up', ('keyboard', 'down'): 'Keyboard light down',
+       ('player', 'toggle'): 'Play / pause', ('player', 'next'): 'Next track', ('player', 'previous'): 'Previous track'}
+NAMES = {'toggle-overview': 'Overview', 'close-window': 'Close window', 'quit': 'Quit niri (log out)',
+         'show-hotkey-overlay': "niri's own short hotkey list", 'screenshot': 'Screenshot: region',
+         'screenshot-screen': 'Screenshot: whole screen', 'screenshot-window': 'Screenshot: window',
+         'fullscreen-window': 'Full screen', 'maximize-column': 'Maximise column',
+         'maximize-window-to-edges': 'Maximise to screen edges', 'toggle-window-floating': 'Float / tile window',
+         'switch-focus-between-floating-and-tiling': 'Focus floating / tiled', 'toggle-column-tabbed-display': 'Tabbed / normal column',
+         'center-column': 'Centre column', 'power-off-monitors': 'Turn the screen off',
+         'consume-window-into-column': 'Pull next window into column', 'expel-window-from-column': 'Push window out of column',
+         'consume-or-expel-window-left': 'Join / leave column (left)', 'consume-or-expel-window-right': 'Join / leave column (right)',
+         'switch-preset-column-width': 'Next column width preset', 'switch-preset-column-width-back': 'Previous column width preset',
+         'toggle-keyboard-shortcuts-inhibit': 'Let an app take over the keys (escape hatch)',
+         'switch-layout': 'Next keyboard layout'}
+
+def describe(props, action, args):
+    p = dict((k, unq(v)) for k, v in re.findall(r'([\w-]+)=("(?:[^"\\]|\\.)*"|\S+)', props))
+    title = p.get('hotkey-overlay-title')
+    if title and title != 'null': return title
+    if action in ('spawn', 'spawn-sh'):
+        a = args
+        if 'ipc' in a and 'call' in a:
+            i = a.index('call'); t = tuple(a[i + 1:i + 3])
+            if t in IPC: return IPC[t]
+        if a and a[0] == 'brightnessctl' and any('kbd_backlight' in x for x in a):
+            return 'Keyboard light ' + ('up' if any('+' in x for x in a) else 'down')
+        if a and a[0] == 'brightnessctl': return 'Screen light ' + ('up' if any('+' in x for x in a) else 'down')
+        cmd = ' '.join(a)
+        if 'wpctl' in cmd and 'set-volume' in cmd: return 'Volume ' + ('up' if '+' in cmd else 'down')
+        if 'wpctl' in cmd and 'set-mute' in cmd: return 'Mute'
+        if 'playerctl' in cmd: return 'Media: ' + cmd.split('playerctl')[-1].strip()
+        return 'Run ' + (cmd if len(cmd) <= 44 else cmd[:43] + '…')
+    if action in NAMES: return NAMES[action]
+    text = action.replace('-', ' ').capitalize()
+    return text + (' ' + ' '.join(args) if args else '')
+
+def group_of(key, action, args):
+    if key.startswith('XF86'): return 'Keys'
+    if action in ('spawn', 'spawn-sh'):
+        return 'Shell' if 'ipc' in args else 'Apps'
+    if 'workspace' in action: return 'Workspaces'
+    if 'screenshot' in action: return 'Screenshot'
+    if any(w in action for w in ('width', 'height', 'maximize', 'fullscreen', 'floating', 'tabbed', 'center', 'column-width')): return 'Layout'
+    if action in ('quit', 'power-off-monitors', 'toggle-keyboard-shortcuts-inhibit', 'show-hotkey-overlay'): return 'Session'
+    if action == 'toggle-overview': return 'Shell'
+    return 'Windows'
+ORDER = ['Shell', 'Apps', 'Windows', 'Workspaces', 'Layout', 'Screenshot', 'Keys', 'Session']
+
+def config_files(path, seen):
+    path = os.path.realpath(os.path.expanduser(path))
+    if path in seen or not os.path.isfile(path): return []
+    seen.add(path); text = clean(open(path, encoding='utf-8', errors='replace').read())
+    files = [(path, text)]
+    for inc in re.findall(r'^\s*include\s+"([^"]+)"', text, re.M):
+        files += config_files(os.path.join(os.path.dirname(path), inc), seen)
+    return files
+
+def main():
+    base = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config')), 'niri', 'config.kdl')
+    files = config_files(base, set())
+    groups, raw = {}, []
+    for path, text in files:
+        for block in binds_blocks(text):
+            for key, props, body in entries(block):
+                stmt = TOK.findall(body.strip().split('\n')[0].split(';')[0]) or ['?']
+                action, args = stmt[0], [unq(x) for x in stmt[1:]]
+                raw.append((key, props, action, args, os.path.basename(path)))
+    # fold Mod+1 ... Mod+9 style binds into one line
+    fold = {}
+    for r in raw:
+        key, props, action, args, src = r
+        if args and args[0].isdigit() and key.split('+')[-1] == args[0] and 'workspace' in action:
+            fold.setdefault(('+'.join(key.split('+')[:-1]), action), []).append(r)
+    skip = set()
+    for (mods, action), rs in fold.items():
+        if len(rs) >= 3:
+            for r in rs[1:]: skip.add(id(r))
+    for r in raw:
+        if id(r) in skip: continue
+        key, props, action, args, src = r
+        desc = describe(props, action, args)
+        shown = pretty_key(key)
+        rs = fold.get(('+'.join(key.split('+')[:-1]), action), [])
+        if len(rs) >= 3 and rs[0] is r:
+            nums = sorted(int(x[3][0]) for x in rs)
+            shown = pretty_key('+'.join(key.split('+')[:-1] + [str(nums[0])])) + '–' + str(nums[-1])
+            desc = desc.replace(' ' + args[0], '') + ' ' + str(nums[0]) + '–' + str(nums[-1])
+        groups.setdefault(group_of(key, action, args), []).append({'key': shown, 'desc': desc, 'src': src})
+    out = [{'name': g, 'items': groups[g]} for g in ORDER if g in groups]
+    out += [{'name': g, 'items': v} for g, v in groups.items() if g not in ORDER]
+    print(json.dumps({'groups': out, 'files': [os.path.basename(p) for p, _ in files],
+                      'count': sum(len(g['items']) for g in out)}, ensure_ascii=False))
+
+if __name__ == '__main__': main()
