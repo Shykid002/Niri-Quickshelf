@@ -25,6 +25,13 @@ Item {
         id: notesCol
         x: 20; y: 16; width: root.w; spacing: 12
 
+        Txt {   // a piece of the shell failed to start: say which and why
+            visible: Diag.errors.length > 0
+            width: parent.width; wrapMode: Text.WrapAnywhere; color: Theme.red; font.pixelSize: 11
+            text: Diag.errors.length > 0 ? Diag.errors[Diag.errors.length - 1] : ""
+            height: visible ? implicitHeight : 0
+        }
+
         Row {   // week strip
             width: parent.width
             Repeater {

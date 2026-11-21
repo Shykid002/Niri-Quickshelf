@@ -8,6 +8,7 @@ import Quickshell.Services.Mpris
 Singleton {
     id: root
     readonly property var list: Mpris.players.values
+    readonly property var spotify: list.find(p => ((p.desktopEntry || "") + " " + (p.identity || "")).toLowerCase().indexOf("spotify") >= 0) || null
     readonly property var active: {
         const p = list.find(x => x.isPlaying);
         return p || (list.length > 0 ? list[0] : null);

@@ -8,5 +8,5 @@ Rules for every file in this repo:
 - Cursor themes: `rice-ink-dark` on paper, `rice-ink-light` on ink.
 - Terminal tools use ANSI colours only, so they follow the Ghostty palette.
 
-Roadmap (all phases done + extras: sounds, OSD, timer, player, wallpapers): 0 scaffold, 1 theme, 2 wallpaper, 3 primitives, 4 bar, 5 popups, 6 drawer,
+Roadmap (all phases done + extras: sounds, OSD, timer, player, wallpapers, music window): 0 scaffold, 1 theme, 2 wallpaper, 3 primitives, 4 bar, 5 popups, 6 drawer,
 7 session panel, 8 lock, 9 theme transition, 10 cursor+terminal, 11 settings, 12 notifications.

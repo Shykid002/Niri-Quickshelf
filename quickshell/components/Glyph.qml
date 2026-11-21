@@ -3,7 +3,7 @@ import qs
 
 // Small themable bar icons drawn in code, so they follow the theme with no image tinting.
 // Placeholder geometry: swap for the brush-drawn set later without touching the bar.
-// kind: signal | volume | battery | theme | power | tray     level: 0..1     flag: muted
+// kind: signal volume battery theme power tray note wall play pause prev next list music     level: 0..1     flag: muted
 Canvas {
     id: root
     property string kind: "signal"
@@ -11,7 +11,9 @@ Canvas {
     property bool flag: false
     property color tone: Theme.ink
     property color dim: Theme.rule
-    width: kind === "volume" ? 32 : 16; height: 16
+    property real px: 16                     // size of the icon in pixels (it is drawn on a 16 grid and scaled)
+    width: (kind === "volume" ? 32 : 16) * px / 16; height: px
+    onPxChanged: requestPaint()
     onWidthChanged: requestPaint()
 
     onKindChanged: requestPaint()
@@ -24,7 +26,9 @@ Canvas {
 
     onPaint: {
         const c = getContext("2d");
+        c.setTransform(1, 0, 0, 1, 0, 0);
         c.clearRect(0, 0, width, height);
+        c.setTransform(px / 16, 0, 0, px / 16, 0, 0);
         c.fillStyle = tone; c.strokeStyle = tone;
         c.lineWidth = 1.5; c.lineJoin = "miter"; c.lineCap = "butt";
         const lv = Math.max(0, Math.min(1, level));
@@ -67,6 +71,20 @@ Canvas {
             c.strokeRect(2.75, 2.75, 10.5, 10.5);
             c.fillRect(4.5, 8, 4, 4);
             c.fillRect(9.5, 4.5, 2.5, 2.5);
+        } else if (kind === "play") {
+            c.beginPath(); c.moveTo(4, 2); c.lineTo(13.5, 8); c.lineTo(4, 14); c.closePath(); c.fill();
+        } else if (kind === "pause") {
+            c.fillRect(3.5, 2.5, 3.2, 11); c.fillRect(9.3, 2.5, 3.2, 11);
+        } else if (kind === "prev") {
+            c.fillRect(2.5, 2.5, 2.2, 11);
+            c.beginPath(); c.moveTo(13.5, 2.5); c.lineTo(5.5, 8); c.lineTo(13.5, 13.5); c.closePath(); c.fill();
+        } else if (kind === "next") {
+            c.fillRect(11.3, 2.5, 2.2, 11);
+            c.beginPath(); c.moveTo(2.5, 2.5); c.lineTo(10.5, 8); c.lineTo(2.5, 13.5); c.closePath(); c.fill();
+        } else if (kind === "list") {
+            for (let i = 0; i < 3; i++) { c.fillRect(2, 3 + i * 4.5, 2.2, 2.2); c.fillRect(6, 3 + i * 4.5, 8, 2.2); }
+        } else if (kind === "music") {
+            c.fillRect(8.4, 2, 1.8, 9.5); c.fillRect(4, 9.5, 5, 4); c.fillRect(10.2, 2, 3.8, 2.4);
         } else if (kind === "tray") {
             c.strokeRect(3.75, 3.75, 8.5, 8.5);
         }

@@ -20,6 +20,7 @@ link "$here/bin/rice-theme" "$HOME/.local/bin/rice-theme"
 link "$here/bin/rice-apply" "$HOME/.local/bin/rice-apply"
 link "$here/bin/rice-keys"  "$HOME/.local/bin/rice-keys"
 link "$here/bin/rice-git"   "$HOME/.local/bin/rice-git"
+link "$here/bin/rice-doctor" "$HOME/.local/bin/rice-doctor"
 link "$here/applications/rice-settings.desktop" "$HOME/.local/share/applications/rice-settings.desktop"
 mkdir -p "$HOME/.config/niri" "$HOME/.config/ghostty"
 # first run: write the fragments (touchpad: tap + natural scroll, as in the shipped niri config)
@@ -79,6 +80,7 @@ for p in noctalia waybar mako dunst swaync; do
   pgrep -x "$p" >/dev/null && echo "WARNING: $p is running. It can fight the rice (bars, notifications). Stop it:  pkill -x $p"
 done
 [ "$(pgrep -xc qs)" -gt 1 ] && echo "WARNING: $(pgrep -xc qs) quickshell instances are running (check: pgrep -a qs)"
+command -v cava >/dev/null || echo "NOTE: cava is not installed, so the music window shows a simulated spectrum:  sudo pacman -S cava"
 command -v qs >/dev/null || echo "WARNING: quickshell (qs) is not installed"
 command -v starship >/dev/null && echo "NOTE: starship is installed. If your prompt is starship's, it replaces the rice prompt; git details then come from starship (git_status module)."
 echo "start the shell by hand with:  qs -c rice      (do NOT put RICE_*_TEST=1 in front: that opens the test windows)"

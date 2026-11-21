@@ -1,0 +1,13 @@
+#!/bin/sh
+# rice-doctor: shows which copy of the rice is really installed and running, and what the shell says.
+echo "== where the installed links point (this is what runs, not the folder you unpacked last) =="
+for f in "$HOME/.config/quickshell/rice" "$HOME/.config/niri/keybinds.kdl" "$HOME/.local/bin/rice-theme" "$HOME/.local/bin/rice-keys"; do
+  printf '%-45s -> %s\n' "$f" "$(readlink -f "$f" 2>/dev/null || echo MISSING)"
+done
+echo; echo "== is Mod+P bound in the installed keybinds? =="
+grep -n "Mod+P" "$HOME/.config/niri/keybinds.kdl" 2>/dev/null || echo "NO: keybinds.kdl does not have Mod+P (re-run ./install.sh from the NEW folder)"
+echo; echo "== running quickshell =="; pgrep -a qs || echo "none running"
+echo; echo "== commands the running shell offers (look for: target music) =="
+qs -c rice ipc show 2>&1 | head -40
+echo; echo "== problems the shell recorded =="
+cat "$HOME/.config/rice/errors.log" 2>/dev/null || echo "(none)"

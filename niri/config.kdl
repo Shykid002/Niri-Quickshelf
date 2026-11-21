@@ -22,11 +22,11 @@ layout {
     // Flat and square: no focus ring, a thin border, no shadows.
     // Border colours: theme.kdl.  Border width and gaps: rice-layout.kdl.
     focus-ring { 
-    off
-  }
+    	off
+	}
     border { 
-      width 2;
-    }
+    	width 2;
+	}
 }
 
 environment {
@@ -35,11 +35,12 @@ environment {
 
 prefer-no-csd                       // apps drop their own title bars and rounded corners
 
-hotkey-overlay { skip-at-startup; }
+hotkey-overlay { skip-at-startup }
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 
 // The shell: bar, wallpaper, launcher, lock, notifications.
 spawn-at-startup "qs" "-c" "rice"
+spawn-at-startup "easyeffects" "--gapplication-service"
 
 // ── window rules ────────────────────────────────────────────
 window-rule {                       // Settings and Keybindings open as small floating windows

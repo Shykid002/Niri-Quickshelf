@@ -97,7 +97,7 @@ IPC = {('drawer', 'index'): 'Launcher', ('drawer', 'day'): 'Day drawer', ('lock'
        ('keys', 'toggle'): 'This list of keybindings', ('volume', 'up'): 'Volume up', ('volume', 'down'): 'Volume down',
        ('volume', 'mute'): 'Mute', ('brightness', 'up'): 'Screen light up', ('brightness', 'down'): 'Screen light down',
        ('keyboard', 'up'): 'Keyboard light up', ('keyboard', 'down'): 'Keyboard light down',
-       ('player', 'toggle'): 'Play / pause', ('player', 'next'): 'Next track', ('player', 'previous'): 'Previous track'}
+       ('music', 'toggle'): 'Music player (drops from the top)', ('player', 'toggle'): 'Play / pause', ('player', 'next'): 'Next track', ('player', 'previous'): 'Previous track'}
 NAMES = {'toggle-overview': 'Overview', 'close-window': 'Close window', 'quit': 'Quit niri (log out)',
          'show-hotkey-overlay': "niri's own short hotkey list", 'screenshot': 'Screenshot: region',
          'screenshot-screen': 'Screenshot: whole screen', 'screenshot-window': 'Screenshot: window',
