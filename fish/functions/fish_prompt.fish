@@ -1,6 +1,6 @@
 # ~/Projects/rice ■   (folder name bold, red square)
 function fish_prompt
-    set -U fish_greeting "Welcome back! (^_~)"
+    set -U fish_greeting "Welcome back WalaD! (^_~)"
     set -Ux EDITOR nvim
     set -Ux VISUAL nvim
     set -l cwd (string replace -r "^$HOME" "~" $PWD)

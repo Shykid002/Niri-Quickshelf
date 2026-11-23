@@ -27,12 +27,22 @@ pkill -USR1 -x kitty 2>/dev/null
 # zathura: new windows pick this up
 [ -f "$root/zathura/$name" ] && cp "$root/zathura/$name" "$HOME/.config/zathura/theme"
 
+# btop: render active theme with cover accent, then hot-reload any running btop
+mkdir -p "$HOME/.config/btop/themes"
+if [ -f "$root/btop/$name.theme" ]; then
+  sed -e "s/__COVER__/#$hex/g" -e "s/__COVER_FG__/#$fg/g" \
+    "$root/btop/$name.theme" > "$HOME/.config/btop/themes/rice.theme"
+  pkill -USR2 -x btop 2>/dev/null
+fi
+
+
 # fastfetch: generated from the template (only if the file is ours, a symlink, or missing)
 ff="$HOME/.config/fastfetch/config.jsonc"
 if [ -f "$root/fastfetch/config.jsonc.in" ] && { [ ! -e "$ff" ] || [ -L "$ff" ] || grep -q "paper & ink rice" "$ff" 2>/dev/null; }; then
   mkdir -p "$HOME/.config/fastfetch"; rm -f "$ff"
   sed "s/__COVER_RGB__/$rgb/" "$root/fastfetch/config.jsonc.in" > "$ff"
 fi
+
 
 # GTK 3 + 4: adw-gtk3 / libadwaita colours (named-colour overrides) and settings
 setini() { _f="$1"; _k="$2"; _v="$3"; [ -f "$_f" ] || printf '[Settings]\n' > "$_f"

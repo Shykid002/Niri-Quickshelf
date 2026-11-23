@@ -33,10 +33,12 @@ link "$here/niri/keybinds.kdl" "$HOME/.config/niri/keybinds.kdl"
 for f in "$here"/ghostty/themes/*; do link "$f" "$HOME/.config/ghostty/themes/$(basename "$f")"; done
 [ -e "$HOME/.config/ghostty/config" ] || link "$here/ghostty/config" "$HOME/.config/ghostty/config"
 
-# kitty, yazi, zathura (existing configs are never overwritten; the theme hook fills kitty/theme.conf and zathura/theme)
+# kitty, yazi, zathura, btop (existing configs are never overwritten; the theme hook fills kitty/theme.conf and zathura/theme)
 [ -e "$HOME/.config/kitty/kitty.conf" ]     || link "$here/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf"
 [ -e "$HOME/.config/yazi/theme.toml" ]      || link "$here/yazi/theme.toml" "$HOME/.config/yazi/theme.toml"
 [ -e "$HOME/.config/zathura/zathurarc" ]    || link "$here/zathura/zathurarc" "$HOME/.config/zathura/zathurarc"
+[ -e "$HOME/.config/btop/btop.conf" ]       || link "$here/btop/btop.conf" "$HOME/.config/btop/btop.conf"
+
 
 # GTK / Qt / Firefox
 [ -d /usr/share/themes/adw-gtk3 ] || echo "WARNING: adw-gtk-theme is not installed:  sudo pacman -S adw-gtk-theme"

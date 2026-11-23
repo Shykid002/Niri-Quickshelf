@@ -35,7 +35,7 @@ environment {
 
 prefer-no-csd                       // apps drop their own title bars and rounded corners
 
-hotkey-overlay { skip-at-startup }
+hotkey-overlay { skip-at-startup; }
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 
 // The shell: bar, wallpaper, launcher, lock, notifications.

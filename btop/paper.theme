@@ -1,0 +1,63 @@
+# Paper & Ink Rice — Paper (Light)
+# Ground: #EEEAE1 | Block: #E2DCCF | Ink: #1D1C1A | Muted: #8A8478 | Rule: #C8C0B1
+# Accents: Red #CA4C29 | Ochre #CF9C42 | Indigo #2C3E60 | Pine #486455
+
+theme[main_bg]="#EEEAE1"
+theme[main_fg]="#1D1C1A"
+theme[title]="#1D1C1A"
+theme[hi_fg]="__COVER__"
+theme[selected_bg]="__COVER__"
+theme[selected_fg]="__COVER_FG__"
+theme[inactive_fg]="#8A8478"
+theme[graph_text]="#8A8478"
+theme[meter_bg]="#E2DCCF"
+theme[proc_misc]="__COVER__"
+
+# Box outlines
+theme[cpu_box]="#C8C0B1"
+theme[mem_box]="#C8C0B1"
+theme[net_box]="#C8C0B1"
+theme[proc_box]="#C8C0B1"
+theme[div_line]="#C8C0B1"
+
+# Temperature graph (Pine -> Ochre -> Red)
+theme[temp_start]="#486455"
+theme[temp_mid]="#CF9C42"
+theme[temp_end]="#CA4C29"
+
+# CPU graph (Pine -> Indigo -> Cover)
+theme[cpu_start]="#486455"
+theme[cpu_mid]="#2C3E60"
+theme[cpu_end]="__COVER__"
+
+# Mem/Disk meters
+theme[free_start]="#486455"
+theme[free_mid]="#486455"
+theme[free_end]="#2C3E60"
+
+theme[cached_start]="#2C3E60"
+theme[cached_mid]="#2C3E60"
+theme[cached_end]="#CF9C42"
+
+theme[available_start]="#486455"
+theme[available_mid]="#CF9C42"
+theme[available_end]="#CA4C29"
+
+theme[used_start]="#CF9C42"
+theme[used_mid]="#CA4C29"
+theme[used_end]="#CA4C29"
+
+# Network graphs (Download: Indigo -> Pine | Upload: Ochre -> Red)
+theme[download_start]="#2C3E60"
+theme[download_mid]="#486455"
+theme[download_end]="#486455"
+
+theme[upload_start]="#CF9C42"
+theme[upload_mid]="#CA4C29"
+theme[upload_end]="#CA4C29"
+
+# Process box gradient (Ink -> Muted -> Cover)
+theme[process_start]="#1D1C1A"
+theme[process_mid]="#8A8478"
+theme[process_end]="__COVER__"
+
