@@ -77,6 +77,12 @@ hi("PmenuSel",     { fg = cover_fg, bg = cover, bold = true })
 hi("PmenuSbar",    { bg = p.block })
 hi("PmenuThumb",   { bg = p.rule })
 
+hi("BlinkCmpMenu",          { fg = p.ink,    bg = p.block })
+hi("BlinkCmpMenuBorder",    { fg = cover,    bg = p.block })
+hi("BlinkCmpMenuSelection", { fg = cover_fg, bg = cover, bold = true })
+hi("BlinkCmpGhostText",     { fg = p.muted,  italic = true })
+
+
 -- ── Messages & Prompts ────────────────────────────────────
 hi("ModeMsg",      { fg = cover,   bold = true })
 hi("MoreMsg",      { fg = p.pine,  bold = true })
@@ -166,4 +172,15 @@ hi("DiffText",     { fg = p.indigo, bg = p.block, bold = true })
 hi("GitSignsAdd",    { fg = p.pine })
 hi("GitSignsChange", { fg = p.ochre })
 hi("GitSignsDelete", { fg = p.red })
+
+-- ── Snacks Dashboard (Paper & Ink Book Cover) ────────────
+hi("SnacksDashboardHeader",  { fg = cover,   bold = true })
+hi("SnacksDashboardKey",     { fg = cover,   bold = true })
+hi("SnacksDashboardDesc",    { fg = p.ink })
+hi("SnacksDashboardIcon",    { fg = cover })
+hi("SnacksDashboardTitle",   { fg = p.muted, bold = true })
+hi("SnacksDashboardFile",    { fg = p.ink })
+hi("SnacksDashboardDir",     { fg = p.muted })
+hi("SnacksDashboardFooter",  { fg = p.muted, italic = true })
+hi("SnacksDashboardSpecial", { fg = p.pine })
 

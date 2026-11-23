@@ -3,7 +3,16 @@
 # cover = red|indigo|ochre|pine|mix (the cover colour from Settings; mix uses red outside the wallpaper)
 # Ghostty follows the colour-scheme gsetting by itself. Safe to run on any compositor.
 mode="${1:-light}"
-cover="${2:-red}"
+mkdir -p "$HOME/.cache"
+if [ -n "${2:-}" ]; then
+  cover="$2"
+  printf '%s' "$cover" > "$HOME/.cache/rice-cover"
+elif [ -f "$HOME/.cache/rice-cover" ]; then
+  cover="$(cat "$HOME/.cache/rice-cover")"
+else
+  cover="red"
+fi
+
 if [ "$mode" = dark ]; then
   case $cover in indigo) hex=6D84AF;; ochre) hex=D7AD59;; pine) hex=7C9987;; *) hex=DE603B;; esac
 else
@@ -47,16 +56,12 @@ if [ -f "$root/nvim/rice.lua.in" ]; then
   done
 fi
 
-
-
-
 # fastfetch: generated from the template (only if the file is ours, a symlink, or missing)
 ff="$HOME/.config/fastfetch/config.jsonc"
 if [ -f "$root/fastfetch/config.jsonc.in" ] && { [ ! -e "$ff" ] || [ -L "$ff" ] || grep -q "paper & ink rice" "$ff" 2>/dev/null; }; then
   mkdir -p "$HOME/.config/fastfetch"; rm -f "$ff"
   sed "s/__COVER_RGB__/$rgb/" "$root/fastfetch/config.jsonc.in" > "$ff"
 fi
-
 
 # GTK 3 + 4: adw-gtk3 / libadwaita colours (named-colour overrides) and settings
 setini() { _f="$1"; _k="$2"; _v="$3"; [ -f "$_f" ] || printf '[Settings]\n' > "$_f"
@@ -74,7 +79,7 @@ gsettings set org.gnome.desktop.interface gtk-theme "$gtktheme" 2>/dev/null
 # Qt (qt6ct / qt5ct): palette file; touching the config makes running apps re-read it
 for q in qt6ct qt5ct; do
   mkdir -p "$HOME/.config/$q/colors"
-  sed -e "s/__COVER__/$hex/g" -e "s/__COVER_FG__/$fg/g" "$root/qt/rice-$name.conf" > "$HOME/.config/$q/colors/rice.conf"
+  sed -e "s/__COVER__/$hex/g" -e "s/__COVER_FG__/#$fg/g" "$root/qt/rice-$name.conf" > "$HOME/.config/$q/colors/rice.conf"
   [ -f "$HOME/.config/$q/$q.conf" ] && touch "$HOME/.config/$q/$q.conf"
 done
 
@@ -102,3 +107,4 @@ gsettings set org.gnome.desktop.interface cursor-theme "$cursor" 2>/dev/null
 gsettings set org.gnome.desktop.interface cursor-size 24 2>/dev/null
 [ -n "$NIRI_SOCKET" ] && niri msg action load-config-file >/dev/null 2>&1
 exit 0
+
