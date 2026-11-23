@@ -1,0 +1,64 @@
+vim.cmd("highlight clear")
+if vim.fn.exists("syntax_on") == 1 then vim.cmd("syntax reset") end
+
+vim.g.colors_name = "rice"
+local raw_mode = "__MODE__"
+local mode = (raw_mode == "dark" or raw_mode == "light") and raw_mode or vim.o.background
+vim.o.background = mode
+
+local p = mode == "dark" and {
+  paper = "#171619", block = "#222023", ink = "#E7E2D5", muted = "#8F8A80",
+  rule = "#3A3636", red = "#DE603B", ochre = "#D7AD59", indigo = "#6D84AF", pine = "#7C9987",
+} or {
+  paper = "#EEEAE1", block = "#E2DCCF", ink = "#1D1C1A", muted = "#8A8478",
+  rule = "#C8C0B1", red = "#CA4C29", ochre = "#CF9C42", indigo = "#2C3E60", pine = "#486455",
+}
+
+local raw_cover    = "__COVER__"
+local raw_cover_fg = "__COVER_FG__"
+local cover        = raw_cover:match("^#%x%x%x%x%x%x$") and raw_cover or p.red
+local cover_fg     = raw_cover_fg:match("^#%x%x%x%x%x%x$") and raw_cover_fg or p.paper
+
+local function hi(group, opts) vim.api.nvim_set_hl(0, group, opts) end
+
+hi("Normal",       { fg = p.ink,   bg = p.paper })
+hi("NormalFloat",  { fg = p.ink,   bg = p.block })
+hi("FloatBorder",  { fg = cover,   bg = p.block })
+hi("FloatTitle",   { fg = cover_fg, bg = cover, bold = true })
+hi("CursorLine",   { bg = p.block })
+hi("Cursor",       { fg = cover_fg, bg = cover })
+hi("Visual",       { fg = cover_fg, bg = cover })
+hi("Search",       { fg = cover_fg, bg = cover })
+hi("IncSearch",    { fg = p.paper, bg = p.ink, bold = true })
+hi("LineNr",       { fg = p.muted })
+hi("CursorLineNr", { fg = cover,   bold = true })
+hi("SignColumn",   { fg = p.muted, bg = p.paper })
+hi("VertSplit",    { fg = p.rule })
+hi("WinSeparator", { fg = p.rule })
+hi("StatusLine",   { fg = cover_fg, bg = cover, bold = true })
+hi("StatusLineNC", { fg = p.muted,  bg = p.block })
+hi("Pmenu",        { fg = p.ink,    bg = p.block })
+hi("PmenuSel",     { fg = cover_fg, bg = cover, bold = true })
+hi("ModeMsg",      { fg = cover,   bold = true })
+hi("ErrorMsg",     { fg = cover,   bold = true })
+hi("Directory",    { fg = cover,   bold = true })
+hi("Title",        { fg = cover,   bold = true })
+hi("Comment",      { fg = p.muted, italic = true })
+hi("Constant",     { fg = p.ochre })
+hi("String",       { fg = p.pine })
+hi("Number",       { fg = p.ochre })
+hi("Boolean",      { fg = p.ochre, bold = true })
+hi("Identifier",   { fg = p.ink })
+hi("Function",     { fg = p.indigo, bold = true })
+hi("Statement",    { fg = cover,   bold = true })
+hi("Conditional",  { fg = cover,   bold = true })
+hi("Repeat",       { fg = cover,   bold = true })
+hi("Operator",     { fg = p.muted })
+hi("Keyword",      { fg = cover,   bold = true })
+hi("Exception",    { fg = cover,   bold = true })
+hi("PreProc",      { fg = cover })
+hi("Type",         { fg = p.ochre })
+hi("Special",      { fg = cover })
+hi("Delimiter",    { fg = p.muted })
+hi("Todo",         { fg = cover_fg, bg = cover, bold = true })
+hi("Error",        { fg = cover,    bold = true })

@@ -35,6 +35,20 @@ if [ -f "$root/btop/$name.theme" ]; then
   pkill -USR2 -x btop 2>/dev/null
 fi
 
+# nvim: generate colors/rice.lua and live-reload every running neovim socket
+mkdir -p "$HOME/.config/nvim/colors"
+if [ -f "$root/nvim/rice.lua.in" ]; then
+  nvim_bg="light"
+  [ "$name" = "ink" ] && nvim_bg="dark"
+  sed -e "s/__MODE__/$nvim_bg/g" -e "s/__COVER__/#$hex/g" -e "s/__COVER_FG__/#$fg/g" \
+    "$root/nvim/rice.lua.in" > "$HOME/.config/nvim/colors/rice.lua"
+  for sock in "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"/nvim.*.0 "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"/nvim/nvim.*.0; do
+    [ -S "$sock" ] && nvim --server "$sock" --remote-send '<Cmd>colorscheme rice<CR>' >/dev/null 2>&1 &
+  done
+fi
+
+
+
 
 # fastfetch: generated from the template (only if the file is ours, a symlink, or missing)
 ff="$HOME/.config/fastfetch/config.jsonc"

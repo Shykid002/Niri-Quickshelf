@@ -1,6 +1,12 @@
 # zathura for the rice. Colours: theme (bin/rice-theme copies the paper or ink file there).
 include theme
 
+#key map
+map <Right> navigate next
+map <Left> navigate previous
+map i recolor
+
+
 set font "EB Garamond 12"
 set guioptions "s"
 set adjust-open "best-fit"

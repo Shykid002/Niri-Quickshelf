@@ -133,23 +133,7 @@ Item {
                    on: Countdown.ringing; accent: Theme.red; onClicked: Countdown.stop() }
         }
 
-        Txt { text: "Playing"; color: Theme.muted; font.pixelSize: 12; topPadding: 4 }
-        Column {
-            width: parent.width
-            Txt { width: parent.width; elide: Text.ElideRight; font.pixelSize: 15
-                  text: Player.active ? (Player.title || "Unknown track") : "Nothing playing"
-                  color: Player.active ? Theme.ink : Theme.muted }
-            Txt { visible: Player.active && Player.artist !== ""; width: parent.width; elide: Text.ElideRight
-                  text: Player.artist; color: Theme.muted; font.pixelSize: 12 }
-        }
-        Row {
-            spacing: 2
-            Tile { width: (root.w - 4) / 3; titleSize: 13; title: "Previous"; onClicked: Player.previous() }
-            Tile { width: (root.w - 4) / 3; titleSize: 13; title: Player.playing ? "Pause" : "Play"
-                   on: Player.playing; accent: Theme.pine; onClicked: Player.toggle() }
-            Tile { width: (root.w - 4) / 3; titleSize: 13; title: "Next"; onClicked: Player.next() }
-        }
-        Rectangle { width: parent.width; height: 1; color: Theme.rule }
+               Rectangle { width: parent.width; height: 1; color: Theme.rule }
 
         Item {   // Notes
             width: parent.width; height: 18
