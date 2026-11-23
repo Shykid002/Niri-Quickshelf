@@ -1,6 +1,6 @@
 #!/bin/sh
 # rice-theme dark|light [cover] : flip everything outside the shell (cursor, niri, kitty, fastfetch, GTK cursor).
-# cover = red|indigo|ochre|pine|mix (the cover colour from Settings; mix uses red outside the wallpaper)
+# cover = red|indigo|ochre|pine|plum|umber|slate|moss|mix
 # Ghostty follows the colour-scheme gsetting by itself. Safe to run on any compositor.
 mode="${1:-light}"
 mkdir -p "$HOME/.cache"
@@ -14,15 +14,33 @@ else
 fi
 
 if [ "$mode" = dark ]; then
-  case $cover in indigo) hex=6D84AF;; ochre) hex=D7AD59;; pine) hex=7C9987;; *) hex=DE603B;; esac
+  case $cover in
+    indigo) hex=6D84AF;;
+    ochre)  hex=D7AD59;;
+    pine)   hex=7C9987;;
+    plum)   hex=C47A98;;
+    umber)  hex=B58E79;;
+    slate)  hex=8CA3B5;;
+    moss)   hex=ADB36F;;
+    *)      hex=DE603B;;
+  esac
 else
-  case $cover in indigo) hex=2C3E60;; ochre) hex=CF9C42;; pine) hex=486455;; *) hex=CA4C29;; esac
+  case $cover in
+    indigo) hex=2C3E60;;
+    ochre)  hex=CF9C42;;
+    pine)   hex=486455;;
+    plum)   hex=7D3B56;;
+    umber)  hex=6B4C3B;;
+    slate)  hex=4D5E6B;;
+    moss)   hex=6E733B;;
+    *)      hex=CA4C29;;
+  esac
 fi
 if [ "$mode" = dark ]; then fg=171619; else case $cover in ochre) fg=1D1C1A;; *) fg=EEEAE1;; esac; fi
 rgb="$(printf '%d;%d;%d' 0x$(echo "$hex" | cut -c1-2) 0x$(echo "$hex" | cut -c3-4) 0x$(echo "$hex" | cut -c5-6))"
 root="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 if [ "$mode" = dark ]; then name=ink; else name=paper; fi
-case $cover in indigo|ochre|pine) ckey=$cover;; *) ckey=red;; esac
+case $cover in indigo|ochre|pine|plum|umber|slate|moss) ckey=$cover;; *) ckey=red;; esac
 cursor="rice-$name-$ckey"          # e.g. rice-ink-pine: the cover colour is drawn into the pointer
 
 mkdir -p "$HOME/.config/niri"

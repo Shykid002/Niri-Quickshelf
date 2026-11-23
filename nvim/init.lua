@@ -50,20 +50,28 @@ opt.swapfile = false
 opt.backup = false
 opt.clipboard = "unnamedplus"    -- Sync with Wayland system clipboard (wl-clipboard)
 opt.updatetime = 250
-opt.timeoutlen = 300
+opt.timeoutlen = 500
 
--- ── Load Paper & Ink Rice Colorscheme + Auto-Reload Watcher ──
+-- ── Load Paper & Ink Rice Colorscheme + Directory Watcher ──
 pcall(vim.cmd.colorscheme, "rice")
 
-local rice_color_file = vim.fn.stdpath("config") .. "/colors/rice.lua"
+local colors_dir = vim.fn.stdpath("config") .. "/colors"
+vim.fn.mkdir(colors_dir, "p")
+
 local watcher = (vim.uv or vim.loop).new_fs_event()
-if watcher and vim.fn.filereadable(rice_color_file) == 1 then
-  watcher:start(rice_color_file, {}, vim.schedule_wrap(function(err)
-    if not err then
+if watcher then
+  watcher:start(colors_dir, {}, vim.schedule_wrap(function(err, filename)
+    if not err and (not filename or filename == "rice.lua") then
       pcall(vim.cmd.colorscheme, "rice")
     end
   end))
 end
+
+vim.api.nvim_create_autocmd("FocusGained", {
+  callback = function()
+    pcall(vim.cmd.colorscheme, "rice")
+  end,
+})
 
 -- ── Essential Keymaps ─────────────────────────────────────
 local map = vim.keymap.set

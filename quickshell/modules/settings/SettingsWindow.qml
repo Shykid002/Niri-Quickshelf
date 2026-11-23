@@ -27,8 +27,9 @@ FloatingWindow {
             { label: "Theme change", type: "options",
               options: [["held", "Held page"], ["leaf", "Leaf"], ["ink", "Ink"], ["none", "None"]],
               get: () => Prefs.themeChange, set: v => { Prefs.themeChange = v } },
-            { label: "Cover", type: "swatches", options: [["mix"], ["red"], ["indigo"], ["ochre"], ["pine"]],
-              get: () => Prefs.cover, set: v => { Prefs.cover = v } },
+            { label: "Cover", type: "swatches",
+              options: [["mix"], ["red"], ["indigo"], ["ochre"], ["pine"], ["plum"], ["umber"], ["slate"], ["moss"]],
+              get: () => Prefs.cover, set: v => { Prefs.cover = v; Theme.syncApps(Theme.dark) } },
             { label: "Cover scales", type: "toggle", get: () => Prefs.coverScales, set: v => { Prefs.coverScales = v } },
             { label: "Verse", type: "toggle", get: () => Prefs.verse, set: v => { Prefs.verse = v } },
             { label: "Motion", type: "options", options: [["quick", "Quick"], ["usual", "Usual"], ["slow", "Slow"]],
@@ -56,8 +57,7 @@ FloatingWindow {
     })
 
     function swatch(v) {
-        return v === "red" ? Theme.red : v === "indigo" ? Theme.indigo : v === "ochre" ? Theme.ochre
-             : v === "pine" ? Theme.pine : "transparent";
+        return v === "mix" ? "transparent" : (Theme[v] || Theme.red);
     }
 
     Item {
@@ -119,7 +119,7 @@ FloatingWindow {
 
                     Row {   // colour swatches
                         visible: row.modelData.type === "swatches"
-                        x: 159; anchors.verticalCenter: parent.verticalCenter; spacing: 19
+                        x: 159; anchors.verticalCenter: parent.verticalCenter; spacing: 16
                         Repeater {
                             model: row.modelData.type === "swatches" ? row.modelData.options : []
                             delegate: Item {
@@ -153,3 +153,4 @@ FloatingWindow {
         }
     }
 }
+
