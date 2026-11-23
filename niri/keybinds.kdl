@@ -12,6 +12,9 @@ binds {
     Mod+P           hotkey-overlay-title="Music player"   { spawn "qs" "-c" "rice" "ipc" "call" "music" "toggle"; }
     Mod+Slash       hotkey-overlay-title="Keybindings"    { spawn "qs" "-c" "rice" "ipc" "call" "keys" "toggle"; }
     Mod+S           hotkey-overlay-title="Settings"       { spawn "qs" "-c" "rice" "ipc" "call" "settings" "open"; }
+    Mod+W 	    hotkey-overlay-title="Wallpaper picker" { spawn "qs" "-c" "rice" "ipc" "call" "wallpaper" "toggle"; }
+    Mod+N           hotkey-overlay-title="Network popup"  { spawn "qs" "-c" "rice" "ipc" "call" "network" "toggle"; }
+
 
     // ── sound and light (also while locked) ──
     XF86AudioRaiseVolume  allow-when-locked=true { spawn "qs" "-c" "rice" "ipc" "call" "volume" "up"; }

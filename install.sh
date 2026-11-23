@@ -7,6 +7,13 @@ link() { mkdir -p "$(dirname "$2")"; ln -sfn "$1" "$2"; echo "linked  $2"; }
 # shell
 link "$here/quickshell" "$HOME/.config/quickshell/rice"
 
+# fonts (install any bundled fonts from fonts/ into ~/.local/share/fonts/rice)
+if [ -d "$here/fonts" ] && ls "$here"/fonts/*.{ttf,otf} >/dev/null 2>&1; then
+  mkdir -p "$HOME/.local/share/fonts/rice"
+  cp -u "$here"/fonts/*.{ttf,otf} "$HOME/.local/share/fonts/rice/" 2>/dev/null || true
+  fc-cache -f "$HOME/.local/share/fonts/rice"
+fi
+
 # cursors (regenerate if missing)
 [ -d "$here/cursors/rice-paper-red" ] || python3 "$here/bin/gen-cursors.py" "$here/cursors"
 rm -f "$HOME/.local/share/icons/rice-ink-dark" "$HOME/.local/share/icons/rice-ink-light"   # old names
@@ -33,12 +40,11 @@ link "$here/niri/keybinds.kdl" "$HOME/.config/niri/keybinds.kdl"
 for f in "$here"/ghostty/themes/*; do link "$f" "$HOME/.config/ghostty/themes/$(basename "$f")"; done
 [ -e "$HOME/.config/ghostty/config" ] || link "$here/ghostty/config" "$HOME/.config/ghostty/config"
 
-# kitty, yazi, zathura, btop (existing configs are never overwritten; the theme hook fills kitty/theme.conf and zathura/theme)
+# kitty, yazi, zathura, btop (existing configs are never overwritten; the theme hook fills kitty/theme.conf, zathura/theme, and btop/themes/rice.theme)
 [ -e "$HOME/.config/kitty/kitty.conf" ]     || link "$here/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf"
 [ -e "$HOME/.config/yazi/theme.toml" ]      || link "$here/yazi/theme.toml" "$HOME/.config/yazi/theme.toml"
 [ -e "$HOME/.config/zathura/zathurarc" ]    || link "$here/zathura/zathurarc" "$HOME/.config/zathura/zathurarc"
 [ -e "$HOME/.config/btop/btop.conf" ]       || link "$here/btop/btop.conf" "$HOME/.config/btop/btop.conf"
-
 
 # GTK / Qt / Firefox
 [ -d /usr/share/themes/adw-gtk3 ] || echo "WARNING: adw-gtk-theme is not installed:  sudo pacman -S adw-gtk-theme"
@@ -69,8 +75,9 @@ if [ "${1:-}" != "--no-niri" ]; then
 fi
 
 echo
+fonts_installed="$(fc-list : family)"
 for f in "EB Garamond" "Monaspace Xenon" "Courier Prime"; do
-  fc-list | grep -qi "$f" && echo "font ok: $f" || echo "font MISSING: $f (put it in fonts/)"
+  printf '%s\n' "$fonts_installed" | grep -qi "$f" && echo "font ok: $f" || echo "font MISSING: $f (put it in fonts/)"
 done
 echo
 if [ "$NIRI_OK" = 1 ]; then echo "niri: your config was replaced by the rice one (backup: ~/.config/niri/config.kdl.bak.*). Log out and back in."
@@ -84,5 +91,6 @@ done
 [ "$(pgrep -xc qs)" -gt 1 ] && echo "WARNING: $(pgrep -xc qs) quickshell instances are running (check: pgrep -a qs)"
 command -v cava >/dev/null || echo "NOTE: cava is not installed, so the music window shows a simulated spectrum:  sudo pacman -S cava"
 command -v qs >/dev/null || echo "WARNING: quickshell (qs) is not installed"
-command -v starship >/dev/null && echo "NOTE: starship is installed. If your prompt is starship's, it replaces the rice prompt; git details then come from starship (git_status module)."
-echo "start the shell by hand with:  qs -c rice      (do NOT put RICE_*_TEST=1 in front: that opens the test windows)"
+command -v starship >/dev/null && echo "NOTE: starship is installed."
+echo "start the shell by hand with:  qs -c rice. "
+
