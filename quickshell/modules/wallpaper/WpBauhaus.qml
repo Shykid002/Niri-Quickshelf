@@ -50,6 +50,14 @@ Item {
             font.pixelSize: 19 * root.u
             color: Theme.muted
         }
+        Txt {
+            visible: Prefs.verse
+            text: "— " + Almanac.verse.by
+            font.pixelSize: (19 * root.u) * 0.8
+            font.italic: true
+            color: Theme.muted
+            opacity: 0.78
+        }
     }
 
     // ── BAUHAUS POSTER COMPOSITION (RIGHT) ──────────────────

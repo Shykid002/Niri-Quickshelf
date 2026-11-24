@@ -36,6 +36,14 @@ Item {
             font.pixelSize: 19 * root.u
             color: Theme.ink
         }
+        Txt {
+            visible: Prefs.verse
+            text: "— " + Almanac.verse.by
+            font.pixelSize: (19 * root.u) * 0.8
+            font.italic: true
+            color: Theme.ink
+            opacity: 0.78
+        }
     }
 
     // ── SWISS GRAPHIC DESIGN POSTER CARD (RIGHT) ────────────

@@ -103,17 +103,19 @@ done
 
 # Icons: Papirus folders in the cover colour (Rice-Papirus, built by bin/rice-icons). Skipped if Papirus is not installed.
 if "$root/bin/rice-icons" "$cover" "$mode" >/dev/null 2>&1; then
+  gsettings set org.gnome.desktop.interface icon-theme Papirus 2>/dev/null
   gsettings set org.gnome.desktop.interface icon-theme Rice-Papirus 2>/dev/null
   for gv in 3.0 4.0; do setini "$HOME/.config/gtk-$gv/settings.ini" gtk-icon-theme-name Rice-Papirus; done
   for q in qt6ct qt5ct; do
     cf="$HOME/.config/$q/$q.conf"; [ -f "$cf" ] || continue
     if grep -q '^icon_theme=' "$cf"; then sed -i 's|^icon_theme=.*|icon_theme=Rice-Papirus|' "$cf"
     else sed -i '/^\[Appearance\]/a icon_theme=Rice-Papirus' "$cf"; fi
+    touch "$cf"
   done
 fi
 
-# Firefox: the accent colour (light/dark flip by itself through prefers-color-scheme)
-"$root/bin/rice-firefox" cover "$cover" >/dev/null 2>&1
+# Firefox: the accent colour and Paper/Ink mode
+"$root/bin/rice-firefox" cover "$cover" "$mode" >/dev/null 2>&1
 
 # apps that read the "default" cursor theme or the environment
 mkdir -p "$HOME/.local/share/icons/default"

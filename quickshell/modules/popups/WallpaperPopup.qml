@@ -36,7 +36,11 @@ PopupFrame {
             width: listView.width
 
             Repeater {
-                model: ["Cover", "Spines", "Quiet", "Grid", "Verse", "Index", "Colophon", "Spread", "Monolith", "Bauhaus", "Swiss"]
+                model: [
+                    "Cover", "Spines", "Quiet", "Grid", "Verse", "Index",
+                    "Colophon", "Spread", "Monolith", "Bauhaus", "Swiss",
+                    "Construct", "Brockmann", "Harmonic", "Concentric"
+                ]
                 delegate: ListRow {
                     id: row
                     required property int index

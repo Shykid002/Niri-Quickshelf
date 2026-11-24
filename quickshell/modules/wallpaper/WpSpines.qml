@@ -23,6 +23,31 @@ Item {
     Txt { x: 120 * root.u; y: 196 * root.u - baselineOffset; text: Almanac.dateWords; font.pixelSize: 22 * root.u; color: Theme.muted }
     Rectangle { x: 120 * root.u; y: 226 * root.u; width: 112 * root.u; height: 1; color: Theme.ink }
 
+    Column {
+        visible: Prefs.verse
+        x: 120 * root.u
+        y: 256 * root.u
+        width: Math.max(220 * root.u, shelf.x - x - 48 * root.u)
+        spacing: 8 * root.u
+
+        Txt {
+            width: parent.width
+            wrapMode: Text.WordWrap
+            lineHeight: 1.28
+            text: "“" + Almanac.verse.text + "”"
+            font.pixelSize: 20 * root.u
+            color: Theme.ink
+        }
+        Txt {
+            width: parent.width
+            wrapMode: Text.WordWrap
+            text: "— " + Almanac.verse.by
+            font.pixelSize: 15 * root.u
+            font.italic: true
+            color: Theme.muted
+        }
+    }
+
     Row {
         id: shelf
         spacing: 10 * root.u
@@ -54,3 +79,4 @@ Item {
     Rectangle { x: 90 * root.u; y: 800 * root.u; width: root.width - 180 * root.u; height: 1; color: Theme.ink }   // the shelf
     Txt { x: 120 * root.u; y: 830 * root.u; text: "basic · niri"; font.pixelSize: 14 * root.u; color: Theme.muted }
 }
+

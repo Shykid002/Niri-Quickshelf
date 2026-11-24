@@ -1,0 +1,266 @@
+#!/usr/bin/env python3
+"""
+rice-ink — Theme-reactive terminal screensaver for the Paper & Ink rice.
+Automatically reads your active Paper/Ink mode and ~/.cache/rice-cover color.
+
+Controls while running:
+  1 / 2 / 3 : Switch modes (1 = Ink Rain, 2 = Editorial Pipes, 3 = Zen Ripples)
+  + / -     : Faster / Slower
+  r         : Re-sync theme colors immediately
+  q / Esc   : Quit
+"""
+import curses, math, os, random, subprocess, time
+
+COVERS = {
+    "red":    ("#CA4C29", "#DE603B"),
+    "indigo": ("#2C3E60", "#6D84AF"),
+    "ochre":  ("#CF9C42", "#D7AD59"),
+    "pine":   ("#486455", "#7C9987"),
+    "plum":   ("#7D3B56", "#C47A98"),
+    "umber":  ("#6B4C3B", "#B58E79"),
+    "slate":  ("#4D5E6B", "#8CA3B5"),
+    "moss":   ("#6E733B", "#ADB36F"),
+}
+
+GLYPHS = list("日月火水木金土山川田人手口目耳心道風雲雨雪花鳥月影墨紙書詩文ⅠⅤⅩⅬⅭⅮⅯ§¶▪◆•")
+PIPES_MAP = {
+    (0, 0): "│", (2, 2): "│",
+    (1, 1): "─", (3, 3): "─",
+    (0, 1): "┌", (3, 2): "┌",
+    (0, 3): "┐", (1, 2): "┐",
+    (2, 1): "└", (3, 0): "└",
+    (2, 3): "┘", (1, 0): "┘",
+}
+DIRS = ((0, -1), (1, 0), (0, 1), (-1, 0))
+
+def hex_to_1000(h):
+    h = h.lstrip("#")
+    return tuple(int(int(h[i:i+2], 16) * 1000 / 255) for i in (0, 2, 4))
+
+def get_rice_state():
+    dark = False
+    try:
+        out = subprocess.check_output(
+            ("gsettings", "get", "org.gnome.desktop.interface", "color-scheme"),
+            stderr=subprocess.DEVNULL, text=True
+        )
+        dark = "prefer-dark" in out
+    except Exception:
+        pass
+
+    cover = "red"
+    cache_file = os.path.expanduser("~/.cache/rice-cover")
+    if os.path.isfile(cache_file):
+        try:
+            c = open(cache_file).read().strip()
+            if c in COVERS:
+                cover = c
+        except Exception:
+            pass
+    return dark, cover
+
+def apply_palette(dark, cover):
+    if curses.can_change_color() and curses.COLORS >= 16:
+        bg_hex    = "#171619" if dark else "#EEEAE1"
+        ink_hex   = "#E7E2D5" if dark else "#1D1C1A"
+        muted_hex = "#8F8A80" if dark else "#8A8478"
+        rule_hex  = "#3A3636" if dark else "#C8C0B1"
+        pair_hex  = COVERS.get(cover, COVERS.get("red"))
+        cov_hex   = pair_hex[1] if dark else pair_hex[0]
+
+        curses.init_color(8,  *hex_to_1000(bg_hex))
+        curses.init_color(9,  *hex_to_1000(cov_hex))
+        curses.init_color(10, *hex_to_1000(ink_hex))
+        curses.init_color(11, *hex_to_1000(muted_hex))
+        curses.init_color(12, *hex_to_1000(rule_hex))
+
+        curses.init_pair(1, 9,  8)
+        curses.init_pair(2, 10, 8)
+        curses.init_pair(3, 11, 8)
+        curses.init_pair(4, 12, 8)
+        return curses.color_pair(1)
+    else:
+        curses.init_pair(1, curses.COLOR_RED, -1)
+        curses.init_pair(2, curses.COLOR_WHITE if dark else curses.COLOR_BLACK, -1)
+        curses.init_pair(3, curses.COLOR_WHITE if dark else curses.COLOR_BLACK, -1)
+        curses.init_pair(4, curses.COLOR_WHITE if dark else curses.COLOR_BLACK, -1)
+        return curses.color_pair(1)
+
+def run(stdscr):
+    curses.curs_set(0)
+    stdscr.nodelay(True)
+    curses.start_color()
+    curses.use_default_colors()
+
+    dark, cover = get_rice_state()
+    bg_pair = apply_palette(dark, cover)
+    stdscr.bkgd(" ", bg_pair)
+
+    mode = 1
+    delay = 0.045
+    last_sync = time.time()
+
+    h, w = stdscr.getmaxyx()
+
+    def make_rain():
+        cols = max(1, w // 2)
+        return (
+            list(random.randint(-h, 0) for _ in range(cols)),
+            list(random.choice((1, 1, 2)) for _ in range(cols)),
+            list(random.randint(6, max(8, h // 2)) for _ in range(cols)),
+        )
+
+    def spawn_pipe():
+        return {
+            "x": random.randint(2, max(3, w - 3)),
+            "y": random.randint(2, max(3, h - 3)),
+            "dir": random.randint(0, 3),
+            "pair": random.choice((1, 1, 2)),
+            "steps": 0,
+        }
+
+    drops, speeds, lengths = make_rain()
+    pipes = list(spawn_pipe() for _ in range(4))
+    ripples = list()
+
+    def reset_buffers():
+        nonlocal h, w, drops, speeds, lengths, pipes, ripples
+        h, w = stdscr.getmaxyx()
+        stdscr.clear()
+        drops, speeds, lengths = make_rain()
+        pipes = list(spawn_pipe() for _ in range(4))
+        ripples = list()
+
+    while True:
+        ch = stdscr.getch()
+        if ch in (ord("q"), ord("Q"), 27):
+            break
+        elif ch == ord("1"):
+            mode = 1; reset_buffers()
+        elif ch == ord("2"):
+            mode = 2; reset_buffers()
+        elif ch == ord("3"):
+            mode = 3; reset_buffers()
+        elif ch in (ord("+"), ord("=")):
+            delay = max(0.015, delay - 0.008)
+        elif ch in (ord("-"), ord("_")):
+            delay = min(0.15, delay + 0.008)
+        elif ch in (ord("r"), ord("R"), curses.KEY_RESIZE):
+            dark, cover = get_rice_state()
+            bg_pair = apply_palette(dark, cover)
+            stdscr.bkgd(" ", bg_pair)
+            reset_buffers()
+
+        if time.time() - last_sync > 2.0:
+            last_sync = time.time()
+            nd, nc = get_rice_state()
+            if (nd, nc) != (dark, cover):
+                dark, cover = nd, nc
+                bg_pair = apply_palette(dark, cover)
+                stdscr.bkgd(" ", bg_pair)
+                stdscr.refresh()
+
+        nh, nw = stdscr.getmaxyx()
+        if (nh, nw) != (h, w):
+            reset_buffers()
+
+        if mode == 1:
+            for i in range(len(drops)):
+                x = i * 2
+                if x >= w - 1:
+                    continue
+                y = drops[i]
+                L = lengths[i]
+
+                if 0 <= y < h - 1:
+                    try:
+                        stdscr.addstr(y, x, random.choice(GLYPHS), curses.color_pair(1) | curses.A_BOLD)
+                    except curses.error:
+                        pass
+                if 0 <= y - 1 < h - 1:
+                    try:
+                        stdscr.addstr(y - 1, x, random.choice(GLYPHS), curses.color_pair(2))
+                    except curses.error:
+                        pass
+                if 0 <= y - (L // 2) < h - 1:
+                    try:
+                        stdscr.addstr(y - (L // 2), x, "·", curses.color_pair(3))
+                    except curses.error:
+                        pass
+                tail_y = y - L
+                if 0 <= tail_y < h - 1:
+                    try:
+                        stdscr.addstr(tail_y, x, "  ", curses.color_pair(1))
+                    except curses.error:
+                        pass
+
+                drops[i] += speeds[i]
+                if drops[i] - L > h:
+                    drops[i] = random.randint(-12, -1)
+                    lengths[i] = random.randint(6, max(8, h // 2))
+
+        elif mode == 2:
+            for idx, p in enumerate(pipes):
+                old_dir = p["dir"]
+                if random.random() < 0.22:
+                    p["dir"] = (old_dir + random.choice((-1, 1))) % 4
+                dx, dy = DIRS[p["dir"]]
+                nx, ny = p["x"] + dx, p["y"] + dy
+                p["steps"] += 1
+
+                if nx < 1 or nx >= w - 2 or ny < 1 or ny >= h - 2 or p["steps"] > (w + h):
+                    if p["steps"] > (w + h) * 2:
+                        stdscr.clear()
+                    pipes[idx] = spawn_pipe()
+                    continue
+
+                glyph = PIPES_MAP.get((old_dir, p["dir"]), "┼")
+                attr = curses.color_pair(p["pair"]) | (curses.A_BOLD if p["pair"] == 1 else 0)
+                try:
+                    stdscr.addstr(ny, nx, glyph, attr)
+                except curses.error:
+                    pass
+                p["x"], p["y"] = nx, ny
+
+        elif mode == 3:
+            if random.random() < 0.14 and len(ripples) < 10:
+                ripples.append({
+                    "cx": random.randint(4, max(5, w - 5)),
+                    "cy": random.randint(3, max(4, h - 4)),
+                    "r": 1,
+                    "max_r": random.randint(5, 13),
+                    "pair": random.choice((1, 2)),
+                })
+            stdscr.erase()
+            alive = list()
+            for rp in ripples:
+                r = rp["r"]
+                pair = rp["pair"] if r < rp["max_r"] * 0.6 else 3
+                attr = curses.color_pair(pair) | (curses.A_BOLD if r <= 2 else 0)
+                ch_ring = "○" if r <= 2 else ("◌" if r < rp["max_r"] - 2 else "·")
+                for deg in range(0, 360, 12):
+                    rad = deg * math.pi / 180.0
+                    px = int(round(rp["cx"] + r * 2.0 * math.cos(rad)))
+                    py = int(round(rp["cy"] + r * math.sin(rad)))
+                    if 0 <= py < h - 1 and 0 <= px < w - 1:
+                        try:
+                            stdscr.addstr(py, px, ch_ring, attr)
+                        except curses.error:
+                            pass
+                rp["r"] += 1
+                if rp["r"] <= rp["max_r"]:
+                    alive.append(rp)
+            ripples = alive
+
+        sig = " rice-ink · " + cover + " · [1]rain [2]pipes [3]ripple [q]quit "
+        if w > len(sig) + 2 and h > 2:
+            try:
+                stdscr.addstr(h - 1, w - len(sig) - 1, sig, curses.color_pair(3))
+            except curses.error:
+                pass
+
+        stdscr.refresh()
+        time.sleep(delay)
+
+if __name__ == "__main__":
+    curses.wrapper(run)
