@@ -1,7 +1,6 @@
 #!/bin/sh
-# rice-theme dark|light [cover] : flip everything outside the shell (cursor, niri, kitty, fastfetch, GTK cursor).
-# cover = red|indigo|ochre|pine|plum|umber|slate|moss|mix
-# Ghostty follows the colour-scheme gsetting by itself. Safe to run on any compositor.
+# rice-theme dark|light [cover] : flip everything outside the shell (cursor, niri, kitty, fastfetch, GTK, Qt, Icons, Firefox).
+# cover = sky|indigo|ochre|pine|plum|umber|mint|sakura|sand|mix
 mode="${1:-light}"
 mkdir -p "$HOME/.cache"
 if [ -n "${2:-}" ]; then
@@ -10,7 +9,7 @@ if [ -n "${2:-}" ]; then
 elif [ -f "$HOME/.cache/rice-cover" ]; then
   cover="$(cat "$HOME/.cache/rice-cover")"
 else
-  cover="red"
+  cover="sky"
 fi
 
 if [ "$mode" = dark ]; then
@@ -20,9 +19,10 @@ if [ "$mode" = dark ]; then
     pine)   hex=7C9987;;
     plum)   hex=C47A98;;
     umber)  hex=B58E79;;
-    slate)  hex=8CA3B5;;
-    moss)   hex=ADB36F;;
-    *)      hex=DE603B;;
+    mint)   hex=A6E3A1;;
+    sakura) hex=F5C2E7;;
+    sand)   hex=E1D2B0;;
+    *)      hex=7DCFFF;;
   esac
 else
   case $cover in
@@ -31,30 +31,39 @@ else
     pine)   hex=486455;;
     plum)   hex=7D3B56;;
     umber)  hex=6B4C3B;;
-    slate)  hex=4D5E6B;;
-    moss)   hex=6E733B;;
-    *)      hex=CA4C29;;
+    mint)   hex=A6E3A1;;
+    sakura) hex=F5C2E7;;
+    sand)   hex=E1D2B0;;
+    *)      hex=7DCFFF;;
   esac
 fi
-if [ "$mode" = dark ]; then fg=171619; else case $cover in ochre) fg=1D1C1A;; *) fg=EEEAE1;; esac; fi
+
+if [ "$mode" = dark ]; then
+  fg=171619
+else
+  case $cover in
+    ochre|sky|mint|sakura|sand|mix|red) fg=1D1C1A;;
+    *) fg=EEEAE1;;
+  esac
+fi
+
 rgb="$(printf '%d;%d;%d' 0x$(echo "$hex" | cut -c1-2) 0x$(echo "$hex" | cut -c3-4) 0x$(echo "$hex" | cut -c5-6))"
 root="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 if [ "$mode" = dark ]; then name=ink; else name=paper; fi
-case $cover in indigo|ochre|pine|plum|umber|slate|moss) ckey=$cover;; *) ckey=red;; esac
-cursor="rice-$name-$ckey"          # e.g. rice-ink-pine: the cover colour is drawn into the pointer
+case $cover in indigo|ochre|pine|plum|umber|mint|sakura|sand) ckey=$cover;; *) ckey=sky;; esac
+cursor="rice-$name-$ckey"
 
 mkdir -p "$HOME/.config/niri"
 [ -f "$root/niri/$name.kdl" ] && sed -e "s/__COVER__/#$hex/g" -e "s/__CURSOR__/$cursor/g" "$root/niri/$name.kdl" > "$HOME/.config/niri/theme.kdl"
 
-# kitty: copy the palette, then reload every running kitty
+# kitty
 mkdir -p "$HOME/.config/kitty" "$HOME/.config/zathura"
 [ -f "$root/kitty/rice-$name.conf" ] && sed -e "s/^cursor #.*/cursor #$hex/" -e "s/^url_color #.*/url_color #$hex/" \
   "$root/kitty/rice-$name.conf" > "$HOME/.config/kitty/theme.conf"
 pkill -USR1 -x kitty 2>/dev/null
-# zathura: new windows pick this up
 [ -f "$root/zathura/$name" ] && cp "$root/zathura/$name" "$HOME/.config/zathura/theme"
 
-# btop: render active theme with cover accent, then hot-reload any running btop
+# btop
 mkdir -p "$HOME/.config/btop/themes"
 if [ -f "$root/btop/$name.theme" ]; then
   sed -e "s/__COVER__/#$hex/g" -e "s/__COVER_FG__/#$fg/g" \
@@ -62,7 +71,7 @@ if [ -f "$root/btop/$name.theme" ]; then
   pkill -USR2 -x btop 2>/dev/null
 fi
 
-# nvim: generate colors/rice.lua and live-reload every running neovim socket
+# nvim
 mkdir -p "$HOME/.config/nvim/colors"
 if [ -f "$root/nvim/rice.lua.in" ]; then
   nvim_bg="light"
@@ -74,36 +83,72 @@ if [ -f "$root/nvim/rice.lua.in" ]; then
   done
 fi
 
-# fastfetch: generated from the template (only if the file is ours, a symlink, or missing)
+# fastfetch
 ff="$HOME/.config/fastfetch/config.jsonc"
 if [ -f "$root/fastfetch/config.jsonc.in" ] && { [ ! -e "$ff" ] || [ -L "$ff" ] || grep -q "paper & ink rice" "$ff" 2>/dev/null; }; then
   mkdir -p "$HOME/.config/fastfetch"; rm -f "$ff"
   sed "s/__COVER_RGB__/$rgb/" "$root/fastfetch/config.jsonc.in" > "$ff"
 fi
 
-# GTK 3 + 4: adw-gtk3 / libadwaita colours (named-colour overrides) and settings
+# GTK 3 + 4 (switchable Rice-A / Rice-B theme dirs so open GTK3 windows like Thunar reload live)
 setini() { _f="$1"; _k="$2"; _v="$3"; [ -f "$_f" ] || printf '[Settings]\n' > "$_f"
            if grep -q "^$_k=" "$_f"; then sed -i "s|^$_k=.*|$_k=$_v|" "$_f"; else printf '%s=%s\n' "$_k" "$_v" >> "$_f"; fi; }
-if [ "$mode" = dark ]; then gtktheme=adw-gtk3-dark; preferdark=1; else gtktheme=adw-gtk3; preferdark=0; fi
+if [ "$mode" = dark ]; then basegtk=adw-gtk3-dark; preferdark=1; else basegtk=adw-gtk3; preferdark=0; fi
+
+cur_gtk="$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null | tr -d "'")"
+if [ "$cur_gtk" = "Rice-A" ]; then livegtk="Rice-B"; else livegtk="Rice-A"; fi
+
+themedir="$HOME/.local/share/themes/$livegtk"
+mkdir -p "$themedir/gtk-3.0" "$themedir/gtk-4.0"
 for gv in 3.0 4.0; do
   mkdir -p "$HOME/.config/gtk-$gv"
-  { sed -e "s/__COVER__/#$hex/g" -e "s/__COVER_FG__/#$fg/g" "$root/gtk/$name.css"; cat "$root/gtk/common.css"; } > "$HOME/.config/gtk-$gv/gtk.css"
-  setini "$HOME/.config/gtk-$gv/settings.ini" gtk-theme-name "$gtktheme"
+  {
+    if [ "$mode" = dark ] && [ -f "/usr/share/themes/$basegtk/gtk-$gv/gtk-dark.css" ]; then
+      printf '@import url("file:///usr/share/themes/%s/gtk-%s/gtk-dark.css");\n' "$basegtk" "$gv"
+    elif [ -f "/usr/share/themes/$basegtk/gtk-$gv/gtk.css" ]; then
+      printf '@import url("file:///usr/share/themes/%s/gtk-%s/gtk.css");\n' "$basegtk" "$gv"
+    fi
+    sed -e "s/__COVER__/#$hex/g" -e "s/__COVER_FG__/#$fg/g" "$root/gtk/$name.css"
+    cat "$root/gtk/common.css"
+  } > "$themedir/gtk-$gv/gtk.css"
+
+  {
+    sed -e "s/__COVER__/#$hex/g" -e "s/__COVER_FG__/#$fg/g" "$root/gtk/$name.css"
+    cat "$root/gtk/common.css"
+  } > "$HOME/.config/gtk-$gv/gtk.css"
+
+  setini "$HOME/.config/gtk-$gv/settings.ini" gtk-theme-name "$livegtk"
   setini "$HOME/.config/gtk-$gv/settings.ini" gtk-application-prefer-dark-theme "$preferdark"
   setini "$HOME/.config/gtk-$gv/settings.ini" gtk-cursor-theme-name "$cursor"
 done
-gsettings set org.gnome.desktop.interface gtk-theme "$gtktheme" 2>/dev/null
+gsettings set org.gnome.desktop.interface gtk-theme "$livegtk" 2>/dev/null
 
-# Qt (qt6ct / qt5ct): palette file; touching the config makes running apps re-read it
+# xsettingsd live reload for GTK3 / XWayland apps
+mkdir -p "$HOME/.config/xsettingsd"
+cat << XEOF > "$HOME/.config/xsettingsd/xsettingsd.conf"
+Net/ThemeName "$livegtk"
+Net/IconThemeName "Rice-Papirus"
+Gtk/CursorThemeName "$cursor"
+Gtk/CursorThemeSize 24
+Gtk/ApplicationPreferDarkTheme $preferdark
+XEOF
+if pgrep -x xsettingsd >/dev/null 2>&1; then
+  pkill -HUP -x xsettingsd 2>/dev/null
+elif command -v xsettingsd >/dev/null 2>&1; then
+  nohup xsettingsd >/dev/null 2>&1 &
+fi
+
+# Qt
 for q in qt6ct qt5ct; do
   mkdir -p "$HOME/.config/$q/colors"
-  sed -e "s/__COVER__/$hex/g" -e "s/__COVER_FG__/#$fg/g" "$root/qt/rice-$name.conf" > "$HOME/.config/$q/colors/rice.conf"
+  sed -e "s/__COVER__/#$hex/g" -e "s/__COVER_FG__/#$fg/g" "$root/qt/rice-$name.conf" > "$HOME/.config/$q/colors/rice.conf"
   [ -f "$HOME/.config/$q/$q.conf" ] && touch "$HOME/.config/$q/$q.conf"
 done
 
-# Icons: Papirus folders in the cover colour (Rice-Papirus, built by bin/rice-icons). Skipped if Papirus is not installed.
+# Icons
 if "$root/bin/rice-icons" "$cover" "$mode" >/dev/null 2>&1; then
   gsettings set org.gnome.desktop.interface icon-theme Papirus 2>/dev/null
+  sleep 0.15
   gsettings set org.gnome.desktop.interface icon-theme Rice-Papirus 2>/dev/null
   for gv in 3.0 4.0; do setini "$HOME/.config/gtk-$gv/settings.ini" gtk-icon-theme-name Rice-Papirus; done
   for q in qt6ct qt5ct; do
@@ -114,10 +159,20 @@ if "$root/bin/rice-icons" "$cover" "$mode" >/dev/null 2>&1; then
   done
 fi
 
-# Firefox: the accent colour and Paper/Ink mode
-"$root/bin/rice-firefox" cover "$cover" "$mode" >/dev/null 2>&1
+# Firefox (live Paper/Ink via color-scheme + live cover accent via accent-color)
+case $cover in
+  indigo) gaccent=blue;;
+  ochre|sand) gaccent=yellow;;
+  pine|mint) gaccent=green;;
+  plum) gaccent=purple;;
+  umber) gaccent=orange;;
+  sakura) gaccent=pink;;
+  *) gaccent=teal;;
+esac
+gsettings set org.gnome.desktop.interface accent-color "$gaccent" 2>/dev/null
+"$root/bin/rice-firefox" cover "$cover" >/dev/null 2>&1
 
-# apps that read the "default" cursor theme or the environment
+# Cursors & environment
 mkdir -p "$HOME/.local/share/icons/default"
 printf '[Icon Theme]\nName=Default\nInherits=%s\n' "$cursor" > "$HOME/.local/share/icons/default/index.theme"
 systemctl --user set-environment XCURSOR_THEME="$cursor" 2>/dev/null

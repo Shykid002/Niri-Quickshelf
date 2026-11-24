@@ -15,6 +15,8 @@ import qs.modules.osd
 import qs.modules.music    // registers the folder; the window itself is created in optional() below, so a mistake in it cannot stop the shell
 import qs.services
 import qs.modules.dev
+import qs.modules.osk
+
 
 // Troubleshooting: leave layers out by name, e.g.
 //   RICE_SKIP=transition,lock qs -c rice
@@ -51,7 +53,8 @@ ShellRoot {
     SettingsLayer {}
     IpcLayer {}
     BindsLayer {}
-    OsdLayer {}
+OsdLayer {}
+    OskLayer {}
 
     // Dev windows:  RICE_THEME_TEST=1 qs -c rice   /   RICE_PRIMITIVES_TEST=1 qs -c rice
     LazyLoader { active: !!Quickshell.env("RICE_THEME_TEST");      ThemeTest {} }

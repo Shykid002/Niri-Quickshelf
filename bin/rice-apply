@@ -1,22 +1,23 @@
 #!/bin/sh
 # rice-apply GAPS BORDER TAP NATURAL FONT   ("-" = leave unset)
-# Writes small fragments that niri and Ghostty include, then reloads niri.
+# Writes small fragments that niri, Ghostty, and Kitty include, then reloads them live.
 gaps="${1:--}" border="${2:--}" tap="${3:-0}" natural="${4:-0}" font="${5:--}"
-n="$HOME/.config/niri"; g="$HOME/.config/ghostty"; mkdir -p "$n" "$g"
+n="$HOME/.config/niri"; g="$HOME/.config/ghostty"; k="$HOME/.config/kitty"
+mkdir -p "$n" "$g" "$k"
 
 {
   echo "// written by rice-apply. Settings > Windows"
   echo "layout {"
-  case $gaps in none) echo "    gaps 0";; small) echo "    gaps 8";; usual) echo "    gaps 16";; esac
-  case $border in thin) echo "    border { width 1 }";; usual) echo "    border { width 2 }";; thick) echo "    border { width 3 }";; esac
+  case $gaps in none) echo "    gaps 0;";; small) echo "    gaps 8;";; usual) echo "    gaps 16;";; esac
+  case $border in thin) echo "    border { width 1; }";; usual) echo "    border { width 2; }";; thick) echo "    border { width 3; }";; esac
   echo "}"
 } > "$n/rice-layout.kdl"
 
 {
   echo "// written by rice-apply. Settings > Input"
   echo "input {"; echo "    touchpad {"
-  [ "$tap" = 1 ] && echo "        tap"
-  [ "$natural" = 1 ] && echo "        natural-scroll"
+  [ "$tap" = 1 ] && echo "        tap;"
+  [ "$natural" = 1 ] && echo "        natural-scroll;"
   echo "    }"; echo "}"
 } > "$n/rice-input.kdl"
 
@@ -24,6 +25,17 @@ n="$HOME/.config/niri"; g="$HOME/.config/ghostty"; mkdir -p "$n" "$g"
   echo "# written by rice-apply. Settings > Terminal"
   case $font in small) echo "font-size = 12";; usual) echo "font-size = 13";; large) echo "font-size = 15";; esac
 } > "$g/rice.conf"
+
+{
+  echo "# written by rice-apply. Settings > Terminal"
+  case $font in small) echo "font_size 11.5";; usual) echo "font_size 13.0";; large) echo "font_size 15.0";; esac
+} > "$k/rice.conf"
+
+# Ensure kitty.conf includes rice.conf so live font_size reloads work immediately
+if [ -f "$k/kitty.conf" ] && ! grep -q '^include rice.conf' "$k/kitty.conf"; then
+  printf '\ninclude rice.conf\n' >> "$k/kitty.conf"
+fi
+pkill -USR1 -x kitty 2>/dev/null || true
 
 [ -n "$NIRI_SOCKET" ] && niri msg action load-config-file >/dev/null 2>&1
 exit 0

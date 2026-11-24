@@ -1,10 +1,9 @@
 #!/bin/sh
 # rice-firefox install        link the stylesheets into every Firefox profile, enable them, write the cover colour
-# rice-firefox cover NAME [light|dark]   rewrite the cover colour and Paper/Ink mode
+# rice-firefox cover NAME     rewrite the cover colour (Paper/Ink flips live via prefers-color-scheme)
 root="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 cmd="${1:-install}"
-cover="${2:-red}"
-mode="${3:-}"
+cover="${2:-sky}"
 
 case $cover in
   indigo) l=2C3E60; d=6D84AF;;
@@ -12,9 +11,10 @@ case $cover in
   pine)   l=486455; d=7C9987;;
   plum)   l=7D3B56; d=C47A98;;
   umber)  l=6B4C3B; d=B58E79;;
-  slate)  l=4D5E6B; d=8CA3B5;;
-  moss)   l=6E733B; d=ADB36F;;
-  *)      l=CA4C29; d=DE603B;;
+  mint)   l=A6E3A1; d=A6E3A1;;
+  sakura) l=F5C2E7; d=F5C2E7;;
+  sand)   l=E1D2B0; d=E1D2B0;;
+  *)      l=7DCFFF; d=7DCFFF;;
 esac
 
 profiles() {
@@ -30,14 +30,8 @@ profiles | while read -r prof; do
   mkdir -p "$prof/chrome"
   if [ "$cmd" = cover ] || [ ! -f "$prof/chrome/rice-cover.css" ]; then
     {
-      if [ "$mode" = "dark" ]; then
-        printf ':root { --rice-accent: #%s; --rice-paper: #171619; --rice-block: #222023; --rice-ink: #E7E2D5; --rice-muted: #8F8A80; --rice-rule: #3A3636; color-scheme: dark; }\n' "$d"
-      elif [ "$mode" = "light" ]; then
-        printf ':root { --rice-accent: #%s; --rice-paper: #EEEAE1; --rice-block: #E2DCCF; --rice-ink: #1D1C1A; --rice-muted: #8A8478; --rice-rule: #C8C0B1; color-scheme: light; }\n' "$l"
-      else
-        printf ':root { --rice-accent: #%s; --rice-paper: #EEEAE1; --rice-block: #E2DCCF; --rice-ink: #1D1C1A; --rice-muted: #8A8478; --rice-rule: #C8C0B1; }\n' "$l"
-        printf '@media (prefers-color-scheme: dark) { :root { --rice-accent: #%s; --rice-paper: #171619; --rice-block: #222023; --rice-ink: #E7E2D5; --rice-muted: #8F8A80; --rice-rule: #3A3636; } }\n' "$d"
-      fi
+      printf ':root { --rice-accent: #%s; --rice-paper: #EEEAE1; --rice-block: #E2DCCF; --rice-ink: #1D1C1A; --rice-muted: #8A8478; --rice-rule: #C8C0B1; }\n' "$l"
+      printf '@media (prefers-color-scheme: dark) { :root { --rice-accent: #%s; --rice-paper: #171619; --rice-block: #222023; --rice-ink: #E7E2D5; --rice-muted: #8F8A80; --rice-rule: #3A3636; } }\n' "$d"
     } > "$prof/chrome/rice-cover.css"
   fi
   if [ "$cmd" = install ]; then
@@ -46,6 +40,5 @@ profiles | while read -r prof; do
     [ -f "$prof/user.js" ] && sed -i '/^\/\/ rice-begin/,/^\/\/ rice-end/d' "$prof/user.js"
     { echo "// rice-begin"; cat "$root/firefox/user.js"; echo "// rice-end"; } >> "$prof/user.js"
   fi
-  echo "firefox profile: $prof"
 done
 exit 0

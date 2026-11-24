@@ -107,7 +107,19 @@ Variants {
                     text: Battery.percent + "%"; color: batBtn.tone; font.pixelSize: 11
                 }
             }
-            BarButton {   // wallpaper: pick one of five for the active theme
+            BarButton {   // on-screen keyboard: geometric glyph + US/ARA label on hover or open
+                id: oskBtn
+                open: OskState.open && (OskState.screenName === "" || OskState.screenName === win.screen.name)
+                onClicked: OskState.toggle(win.screen)
+                Glyph { kind: "keyboard"; tone: oskBtn.tone }
+                Mono {
+                    visible: oskBtn.hovered || oskBtn.open
+                    text: OskState.layout
+                    color: oskBtn.tone
+                    font.pixelSize: 11
+                }
+            }
+            BarButton {   // wallpaper: pick one for the active theme
                 id: wallBtn
                 open: Popups.current === "wall" && Popups.screenName === win.screen.name
                 onClicked: Popups.toggle("wall", win.screen, win.width - wallBtn.mapToItem(null, wallBtn.width, 0).x)
@@ -131,3 +143,4 @@ Variants {
         }
     }
 }
+

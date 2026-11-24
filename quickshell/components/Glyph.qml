@@ -3,7 +3,7 @@ import qs
 
 // Small themable bar icons drawn in code, so they follow the theme with no image tinting.
 // Placeholder geometry: swap for the brush-drawn set later without touching the bar.
-// kind: signal volume battery theme power tray note wall play pause prev next list music     level: 0..1     flag: muted
+// kind: signal volume battery theme power tray note wall play pause prev next list music keyboard     level: 0..1     flag: muted
 Canvas {
     id: root
     property string kind: "signal"
@@ -71,6 +71,12 @@ Canvas {
             c.strokeRect(2.75, 2.75, 10.5, 10.5);
             c.fillRect(4.5, 8, 4, 4);
             c.fillRect(9.5, 4.5, 2.5, 2.5);
+        } else if (kind === "keyboard") {
+            c.lineWidth = 1.25;
+            c.strokeRect(1.625, 3.625, 12.75, 8.75);
+            for (let i = 0; i < 4; i++) c.fillRect(3.25 + i * 2.6, 5.25, 1.5, 1.5);
+            for (let i = 0; i < 3; i++) c.fillRect(4.5 + i * 2.6, 7.5, 1.5, 1.5);
+            c.fillRect(5, 9.85, 6, 1.35);
         } else if (kind === "play") {
             c.beginPath(); c.moveTo(4, 2); c.lineTo(13.5, 8); c.lineTo(4, 14); c.closePath(); c.fill();
         } else if (kind === "pause") {

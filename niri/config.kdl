@@ -40,6 +40,7 @@ screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 
 // The shell: bar, wallpaper, launcher, lock, notifications.
 spawn-at-startup "qs" "-c" "rice"
+spawn-at-startup "xsettingsd"
 spawn-at-startup "easyeffects" "--gapplication-service"
 
 // ── window rules ────────────────────────────────────────────

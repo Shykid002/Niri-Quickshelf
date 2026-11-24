@@ -103,7 +103,7 @@ fc-list | grep -i -E "EB Garamond|Monaspace Xenon|Courier Prime"     # all three
 ```bash
 sudo pacman -S --needed kitty fish firefox neovim zathura zathura-pdf-mupdf \
   yazi eza bat fastfetch starship papirus-icon-theme adw-gtk-theme qt6ct qt5ct \
-  cava libnotify wl-clipboard
+  cava libnotify wl-clipboard blanket meld
 ```
 
 | Package | Used for |

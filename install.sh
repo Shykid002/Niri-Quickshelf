@@ -70,7 +70,9 @@ for q in qt6ct qt5ct; do
   [ -e "$HOME/.config/$q/$q.conf" ] || sed -e "s|__HOME__|$HOME|" -e "s|__QT__|$q|" "$here/qt/qt6ct.conf.in" > "$HOME/.config/$q/$q.conf"
 done
 link "$here/bin/rice-firefox" "$HOME/.local/bin/rice-firefox"
+link "$here/bin/rice-icons"   "$HOME/.local/bin/rice-icons"
 "$here/bin/rice-firefox" install
+link "$here/bin/rice-icons"   "$HOME/.local/bin/rice-icons"
 
 # terminal tools
 for f in "$here"/fish/functions/*.fish; do link "$f" "$HOME/.config/fish/functions/$(basename "$f")"; done
