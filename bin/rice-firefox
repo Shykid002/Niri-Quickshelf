@@ -1,13 +1,24 @@
 #!/bin/sh
 # rice-firefox install        link the stylesheets into every Firefox profile, enable them, write the cover colour
-# rice-firefox cover NAME     only rewrite the cover colour (red | indigo | ochre | pine | mix)
-# Firefox reads these at start-up: restart it once after installing.
+# rice-firefox cover NAME [light|dark]   rewrite the cover colour and Paper/Ink mode
 root="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
-cmd="${1:-install}"; cover="${2:-red}"
-case $cover in indigo) l=2C3E60; d=6D84AF;; ochre) l=CF9C42; d=D7AD59;; pine) l=486455; d=7C9987;; *) l=CA4C29; d=DE603B;; esac
+cmd="${1:-install}"
+cover="${2:-red}"
+mode="${3:-}"
+
+case $cover in
+  indigo) l=2C3E60; d=6D84AF;;
+  ochre)  l=CF9C42; d=D7AD59;;
+  pine)   l=486455; d=7C9987;;
+  plum)   l=7D3B56; d=C47A98;;
+  umber)  l=6B4C3B; d=B58E79;;
+  slate)  l=4D5E6B; d=8CA3B5;;
+  moss)   l=6E733B; d=ADB36F;;
+  *)      l=CA4C29; d=DE603B;;
+esac
 
 profiles() {
-  for base in "$HOME/.mozilla/firefox" "$HOME/.var/app/org.mozilla.firefox/.mozilla/firefox" "$HOME/snap/firefox/common/.mozilla/firefox"; do
+  for base in "$HOME/.config/mozilla/firefox" "$HOME/.mozilla/firefox" "$HOME/.var/app/org.mozilla.firefox/.mozilla/firefox" "$HOME/snap/firefox/common/.mozilla/firefox"; do
     [ -f "$base/profiles.ini" ] || continue
     sed -n 's/^Path=//p' "$base/profiles.ini" | while read -r p; do
       case $p in /*) [ -d "$p" ] && echo "$p";; *) [ -d "$base/$p" ] && echo "$base/$p";; esac
@@ -15,17 +26,23 @@ profiles() {
   done
 }
 
-n=0
 profiles | while read -r prof; do
   mkdir -p "$prof/chrome"
-  # write the cover colour on "cover", or on "install" only if there is none yet (install must not reset your choice)
   if [ "$cmd" = cover ] || [ ! -f "$prof/chrome/rice-cover.css" ]; then
-    printf ':root { --rice-accent: #%s; }\n@media (prefers-color-scheme: dark) { :root { --rice-accent: #%s; } }\n' "$l" "$d" > "$prof/chrome/rice-cover.css"
+    {
+      if [ "$mode" = "dark" ]; then
+        printf ':root { --rice-accent: #%s; --rice-paper: #171619; --rice-block: #222023; --rice-ink: #E7E2D5; --rice-muted: #8F8A80; --rice-rule: #3A3636; color-scheme: dark; }\n' "$d"
+      elif [ "$mode" = "light" ]; then
+        printf ':root { --rice-accent: #%s; --rice-paper: #EEEAE1; --rice-block: #E2DCCF; --rice-ink: #1D1C1A; --rice-muted: #8A8478; --rice-rule: #C8C0B1; color-scheme: light; }\n' "$l"
+      else
+        printf ':root { --rice-accent: #%s; --rice-paper: #EEEAE1; --rice-block: #E2DCCF; --rice-ink: #1D1C1A; --rice-muted: #8A8478; --rice-rule: #C8C0B1; }\n' "$l"
+        printf '@media (prefers-color-scheme: dark) { :root { --rice-accent: #%s; --rice-paper: #171619; --rice-block: #222023; --rice-ink: #E7E2D5; --rice-muted: #8F8A80; --rice-rule: #3A3636; } }\n' "$d"
+      fi
+    } > "$prof/chrome/rice-cover.css"
   fi
   if [ "$cmd" = install ]; then
     ln -sf "$root/firefox/userChrome.css"  "$prof/chrome/userChrome.css"
     ln -sf "$root/firefox/userContent.css" "$prof/chrome/userContent.css"
-    # managed block in user.js (replaced, never duplicated)
     [ -f "$prof/user.js" ] && sed -i '/^\/\/ rice-begin/,/^\/\/ rice-end/d' "$prof/user.js"
     { echo "// rice-begin"; cat "$root/firefox/user.js"; echo "// rice-end"; } >> "$prof/user.js"
   fi

@@ -1,14 +1,6 @@
-/* Paper & ink for Firefox. The palette flips with the system colour scheme (it follows the
-   GTK / portal setting that the rice's theme switch writes). Accent comes from rice-cover.css,
+/* Paper & ink for Firefox. Palette and active cover accent come directly from rice-cover.css,
    which bin/rice-firefox writes. Firefox must use "System theme - auto" (Add-ons > Themes). */
 @import url("rice-cover.css");
-
-:root {
-  --rice-paper: #EEEAE1; --rice-block: #E2DCCF; --rice-ink: #1D1C1A; --rice-muted: #8A8478; --rice-rule: #C8C0B1;
-}
-@media (prefers-color-scheme: dark) {
-  :root { --rice-paper: #171619; --rice-block: #222023; --rice-ink: #E7E2D5; --rice-muted: #8F8A80; --rice-rule: #3A3636; }
-}
 
 :root {
   --toolbar-bgcolor: var(--rice-paper) !important;
@@ -61,3 +53,4 @@ menupopup { border: 1px solid var(--rice-rule) !important; }
 
 /* the rice's serif for the browser's own text */
 #navigator-toolbox, menupopup, panel, #sidebar-box { font-family: "EB Garamond", serif !important; }
+

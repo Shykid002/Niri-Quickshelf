@@ -10,7 +10,17 @@ import configparser, os, re, shutil, subprocess, sys
 # cover colour -> nearest Papirus folder colour. Edit this table to taste.
 # (Papirus has: adwaita black blue bluegrey breeze brown carmine cyan darkcyan deeporange green grey indigo
 #  magenta nordic orange palebrown paleorange pink red teal violet white yellow yaru)
-COLORS = {"red": "deeporange", "mix": "deeporange", "indigo": "indigo", "ochre": "orange", "pine": "green"}
+COLORS = {
+    "red":    "deeporange",
+    "mix":    "deeporange",
+    "indigo": "indigo",
+    "ochre":  "orange",
+    "pine":   "green",
+    "plum":   "carmine",
+    "umber":  "brown",
+    "slate":  "bluegrey",
+    "moss":   "teal",
+}
 
 cover = (sys.argv[1] if len(sys.argv) > 1 else "red").lower()
 mode = sys.argv[2] if len(sys.argv) > 2 else "light"
@@ -72,3 +82,4 @@ open(os.path.join(out, "index.theme"), "w").write("\n".join(lines))
 if shutil.which("gtk-update-icon-cache"):
     subprocess.run(["gtk-update-icon-cache", "-f", "-t", out], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 print("Rice-Papirus: %d folder icons -> %s (on %s)" % (made, color, base_name))
+
