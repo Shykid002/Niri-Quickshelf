@@ -17,6 +17,7 @@ fi
 # cursors: always regenerate, so new colours in quickshell/assets/covers.tsv get their cursor themes
 python3 "$here/bin/gen-cursors.py" "$here/cursors" >/dev/null
 rm -f "$HOME/.local/share/icons/rice-ink-dark" "$HOME/.local/share/icons/rice-ink-light"   # old names
+link "$here/bin/rice-pointer-watch" "$HOME/.local/bin/rice-pointer-watch"
 for d in "$here"/cursors/rice-*; do link "$d" "$HOME/.local/share/icons/$(basename "$d")"; done
 
 # theme hook, called by the shell on every theme change
@@ -30,6 +31,7 @@ link "$here/bin/rice-keys"   "$HOME/.local/bin/rice-keys"
 link "$here/bin/rice-git"    "$HOME/.local/bin/rice-git"
 link "$here/bin/rice-doctor" "$HOME/.local/bin/rice-doctor"
 link "$here/bin/rice-ink"    "$HOME/.local/bin/rice-ink"
+link "$here/bin/rice-pointer-watch" "$HOME/.local/bin/rice-pointer-watch"
 link "$here/applications/rice-settings.desktop" "$HOME/.local/share/applications/rice-settings.desktop"
 mkdir -p "$HOME/.config/niri" "$HOME/.config/ghostty"
 # first run: write the fragments (touchpad: tap + natural scroll, as in the shipped niri config)

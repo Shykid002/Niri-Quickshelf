@@ -1,0 +1,86 @@
+#!/usr/bin/env -S python3 -u
+"""Streams pointer deltas (dx dy) at ~60Hz for CursorFxLayer."""
+import select, sys, time
+
+try:
+    import evdev
+    from evdev import ecodes
+except ImportError:
+    sys.exit(1)
+
+devices = list()
+for path in evdev.list_devices():
+    try:
+        dev = evdev.InputDevice(path)
+        caps = dev.capabilities()
+        rel = caps.get(ecodes.EV_REL, ())
+        raw_abs = caps.get(ecodes.EV_ABS, ())
+        abs_codes = set()
+        for item in raw_abs:
+            if isinstance(item, int):
+                abs_codes.add(item)
+            elif isinstance(item, (tuple, list)) and len(item) > 0:
+                abs_codes.add(next(iter(item)))
+
+        has_rel = (ecodes.REL_X in rel and ecodes.REL_Y in rel)
+        has_abs = ((ecodes.ABS_X in abs_codes and ecodes.ABS_Y in abs_codes) or
+                   (ecodes.ABS_MT_POSITION_X in abs_codes and ecodes.ABS_MT_POSITION_Y in abs_codes))
+        if has_rel or has_abs:
+            devices.append(dev)
+    except Exception:
+        pass
+
+if not devices:
+    sys.exit(2)
+
+last_emit = 0.0
+acc_dx = 0.0
+acc_dy = 0.0
+touch_prev_x = None
+touch_prev_y = None
+
+while True:
+    r, _, _ = select.select(devices, (), (), 0.016)
+    for dev in r:
+        try:
+            for ev in dev.read():
+                if ev.type == ecodes.EV_REL:
+                    if ev.code == ecodes.REL_X:
+                        acc_dx += ev.value
+                    elif ev.code == ecodes.REL_Y:
+                        acc_dy += ev.value
+                elif ev.type == ecodes.EV_KEY and ev.code == ecodes.BTN_TOUCH and ev.value == 0:
+                    touch_prev_x = None
+                    touch_prev_y = None
+                elif ev.type == ecodes.EV_ABS:
+                    if ev.code == ecodes.ABS_MT_TRACKING_ID and ev.value == -1:
+                        touch_prev_x = None
+                        touch_prev_y = None
+                        continue
+                    absinfo = dev.absinfo(ev.code)
+                    if absinfo and absinfo.max > absinfo.min:
+                        span = float(absinfo.max - absinfo.min)
+                        if ev.code in (ecodes.ABS_X, ecodes.ABS_MT_POSITION_X):
+                            norm_x = ((ev.value - absinfo.min) / span) * 1280.0
+                            if touch_prev_x is not None:
+                                dx = norm_x - touch_prev_x
+                                if abs(dx) < 280.0:
+                                    acc_dx += dx
+                            touch_prev_x = norm_x
+                        elif ev.code in (ecodes.ABS_Y, ecodes.ABS_MT_POSITION_Y):
+                            norm_y = ((ev.value - absinfo.min) / span) * 800.0
+                            if touch_prev_y is not None:
+                                dy = norm_y - touch_prev_y
+                                if abs(dy) < 280.0:
+                                    acc_dy += dy
+                            touch_prev_y = norm_y
+        except (BlockingIOError, OSError):
+            pass
+
+    now = time.monotonic()
+    if (acc_dx != 0.0 or acc_dy != 0.0) and (now - last_emit) >= 0.014:
+        sys.stdout.write("%.2f %.2f\n" % (acc_dx, acc_dy))
+        sys.stdout.flush()
+        acc_dx = 0.0
+        acc_dy = 0.0
+        last_emit = now

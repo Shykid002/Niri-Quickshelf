@@ -2,6 +2,8 @@
 # rice-theme dark|light [cover] : flip everything outside the shell (cursor, niri, kitty, fastfetch, GTK, Qt, Icons, Firefox).
 # cover = any name in quickshell/assets/covers.tsv, or mix (unknown names fall back to sky)
 mode="${1:-light}"
+cstyle="${3:-box}"
+csize="${4:-24}"
 mkdir -p "$HOME/.cache"
 
 # one run at a time: rapid cover clicks queue up instead of racing on Rice-A/B and the icon theme
@@ -47,10 +49,10 @@ else
   if [ "$tone" = dark ]; then fg=1D1C1A; else fg=EEEAE1; fi
 fi
 
-cursor="rice-$name-$ckey"
+cursor="rice-$name-$cstyle-$ckey"
 
 mkdir -p "$HOME/.config/niri"
-[ -f "$root/niri/$name.kdl" ] && sed -e "s/__COVER__/#$hex/g" -e "s/__CURSOR__/$cursor/g" "$root/niri/$name.kdl" > "$HOME/.config/niri/theme.kdl"
+  sed -e "s/__COVER__/#$hex/g" -e "s/__CURSOR__/$cursor/g" -e "s/__CURSOR_SIZE__/${csize:-24}/g" "$root/niri/$name.kdl" > "$HOME/.config/niri/theme.kdl"
 
 # kitty
 mkdir -p "$HOME/.config/kitty" "$HOME/.config/zathura"
@@ -125,7 +127,7 @@ cat << XEOF > "$HOME/.config/xsettingsd/xsettingsd.conf"
 Net/ThemeName "$livegtk"
 Net/IconThemeName "Rice-Papirus"
 Gtk/CursorThemeName "$cursor"
-Gtk/CursorThemeSize 24
+Gtk/CursorThemeSize $csize
 Gtk/ApplicationPreferDarkTheme $preferdark
 XEOF
 if pgrep -x xsettingsd >/dev/null 2>&1; then
@@ -168,6 +170,6 @@ systemctl --user set-environment XCURSOR_THEME="$cursor" 2>/dev/null
 dbus-update-activation-environment --systemd XCURSOR_THEME="$cursor" 2>/dev/null
 
 gsettings set org.gnome.desktop.interface cursor-theme "$cursor" 2>/dev/null
-gsettings set org.gnome.desktop.interface cursor-size 24 2>/dev/null
+gsettings set org.gnome.desktop.interface cursor-size "$csize" 2>/dev/null
 [ -n "$NIRI_SOCKET" ] && niri msg action load-config-file >/dev/null 2>&1
 exit 0

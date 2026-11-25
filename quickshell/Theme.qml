@@ -93,7 +93,7 @@ Singleton {
     readonly property color mint:   p.mint
     readonly property color sakura: p.sakura
     readonly property color sand:   p.sand
-    readonly property color red:    p.sky
+    readonly property color red:    cover
 
     // ── type ────────────────────────────────────────────────
     readonly property string serif: "EB Garamond"
@@ -101,7 +101,7 @@ Singleton {
     readonly property int    size:  15
 
     // ── cursor theme to use for the current mode ────────────
-    readonly property string cursorTheme: "rice-" + (dark ? "ink" : "paper") + "-" +
+    readonly property string cursorTheme: "rice-" + (dark ? "ink" : "paper") + "-" + (Prefs.cursorStyle || "box") + "-" +
         (coverMap[Prefs.cover] !== undefined ? Prefs.cover : "sky")
 
     // ── gsetting sync ───────────────────────────────────────
@@ -114,7 +114,9 @@ Singleton {
     // runs rice-theme right away (rice-theme serialises itself with flock)
     function syncNow(toDark) {
         const c = String(Prefs.cover).replace(/[^a-z0-9_-]/g, "");
-        Quickshell.execDetached(new Array("sh", "-c", '"$HOME/.local/bin/rice-theme" ' + (toDark ? "dark" : "light") + " " + c));
+        const st = String(Prefs.cursorStyle || "box").replace(/[^a-z]/g, "");
+        const sz = Number(Prefs.cursorSize || 24);
+        Quickshell.execDetached(new Array("sh", "-c", '"$HOME/.local/bin/rice-theme" ' + (toDark ? "dark" : "light") + " " + c + " " + st + " " + sz));
     }
     // debounced: use this for cover clicks so clicking through the swatches runs rice-theme only once
     function syncApps(toDark) {

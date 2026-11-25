@@ -4,20 +4,37 @@ import Quickshell
 import qs
 import qs.services
 
-// Pushes Windows / Input / Terminal settings out to niri and Ghostty (bin/rice-apply) when they change.
 Singleton {
     id: root
-    function start() {}                    // referencing this singleton is what creates it
+    function start() {}
     property bool ready: false
-    readonly property string args: [Prefs.gaps || "-", Prefs.border || "-", Prefs.tap ? 1 : 0,
-                                    Prefs.natural ? 1 : 0, Prefs.fontSize || "-"].join(" ")
+    readonly property string args: new Array(
+        Prefs.gaps || "-",
+        Prefs.border || "-",
+        Prefs.tap ? 1 : 0,
+        Prefs.natural ? 1 : 0,
+        Prefs.fontSize || "-",
+        Prefs.focusFollowsMouse ? 1 : 0,
+        Prefs.dwt ? 1 : 0,
+        Prefs.cursorStyle || "box",
+        Prefs.cursorSize || 24,
+        Prefs.kbLayout || "us"
+    ).join(" ")
+
     onArgsChanged: if (ready) debounce.restart()
 
-    Timer { interval: 1500; running: true; onTriggered: { root.ready = true; Theme.syncApps(Theme.dark) } }   // ignore the initial load, then sync apps once
-    Connections { target: Prefs; function onCoverChanged() { coverDebounce.restart() } }
-    Timer { id: coverDebounce; interval: 300; onTriggered: Theme.syncApps(Theme.dark) }
+    Timer { interval: 1500; running: true; onTriggered: { root.ready = true; Theme.syncApps(Theme.dark) } }
+    Connections {
+        target: Prefs
+        function onCoverChanged() { Theme.syncApps(Theme.dark) }
+        function onCursorStyleChanged() { Theme.syncNow(Theme.dark) }
+        function onCursorSizeChanged() { Theme.syncNow(Theme.dark) }
+        function onKbLayoutChanged() {
+            if (typeof OskState !== "undefined") OskState.layout = (Prefs.kbLayout === "ara" ? "ARA" : "US");
+        }
+    }
     Timer {
-        id: debounce; interval: 400
-        onTriggered: Quickshell.execDetached(["sh", "-c", '"$HOME/.local/bin/rice-apply" ' + root.args])
+        id: debounce; interval: 250
+        onTriggered: Quickshell.execDetached(new Array("sh", "-c", '"$HOME/.local/bin/rice-apply" ' + root.args))
     }
 }

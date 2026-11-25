@@ -40,6 +40,7 @@ ShellRoot {
     Component.onCompleted: {
         Apply.start(); Notifs.start(); Sounds.start(); Osd.start();
         if (root.on("music")) optional("modules/music/MusicLayer.qml");
+        if (root.on("cursorfx")) optional("modules/cursorfx/CursorFxLayer.qml");
     }
 
     Wallpaper {}

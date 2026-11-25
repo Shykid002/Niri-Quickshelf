@@ -3,13 +3,7 @@
 // bottom. The rice writes them, so Settings and the theme switch can change them live.
 // niri docs: https://niri-wm.github.io/niri/
 
-input {
-    keyboard {
-        xkb { }          // empty = use the system keymap (localectl set-x11-keymap)
-        numlock
-    }
-    // touchpad: Settings > Input  (rice-input.kdl)
-}
+
 
 layout {
     preset-column-widths {

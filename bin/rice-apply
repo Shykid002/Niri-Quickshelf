@@ -1,7 +1,8 @@
 #!/bin/sh
-# rice-apply GAPS BORDER TAP NATURAL FONT   ("-" = leave unset)
-# Writes small fragments that niri, Ghostty, and Kitty include, then reloads them live.
+# rice-apply GAPS BORDER TAP NATURAL FONT FOCUS_MOUSE DWT CURSOR_STYLE CURSOR_SIZE KB_LAYOUT
 gaps="${1:--}" border="${2:--}" tap="${3:-0}" natural="${4:-0}" font="${5:--}"
+focus_mouse="${6:-0}" dwt="${7:-1}" cstyle="${8:-box}" csize="${9:-24}" kblay="${10:-us}"
+
 n="$HOME/.config/niri"; g="$HOME/.config/ghostty"; k="$HOME/.config/kitty"
 mkdir -p "$n" "$g" "$k"
 
@@ -15,10 +16,21 @@ mkdir -p "$n" "$g" "$k"
 
 {
   echo "// written by rice-apply. Settings > Input"
-  echo "input {"; echo "    touchpad {"
+  echo "input {"
+  [ "$focus_mouse" = 1 ] && echo "    focus-follows-mouse;"
+  echo '    mouse { accel-profile "flat"; }'
+  echo "    keyboard {"
+  echo "        xkb {"
+  echo '            layout "us,ara"'
+  echo "        }"
+  echo "    }"
+  echo "    touchpad {"
+  echo '        accel-profile "flat";'
   [ "$tap" = 1 ] && echo "        tap;"
   [ "$natural" = 1 ] && echo "        natural-scroll;"
-  echo "    }"; echo "}"
+  [ "$dwt" = 1 ] && echo "        dwt;"
+  echo "    }"
+  echo "}"
 } > "$n/rice-input.kdl"
 
 {
@@ -31,11 +43,17 @@ mkdir -p "$n" "$g" "$k"
   case $font in small) echo "font_size 11.5";; usual) echo "font_size 13.0";; large) echo "font_size 15.0";; esac
 } > "$k/rice.conf"
 
-# Ensure kitty.conf includes rice.conf so live font_size reloads work immediately
 if [ -f "$k/kitty.conf" ] && ! grep -q '^include rice.conf' "$k/kitty.conf"; then
   printf '\ninclude rice.conf\n' >> "$k/kitty.conf"
 fi
 pkill -USR1 -x kitty 2>/dev/null || true
 
-[ -n "$NIRI_SOCKET" ] && niri msg action load-config-file >/dev/null 2>&1
+if [ -n "$NIRI_SOCKET" ]; then
+  niri msg action load-config-file >/dev/null 2>&1
+  if [ "$kblay" = "ara" ]; then
+    niri msg action switch-layout 1 >/dev/null 2>&1 || true
+  else
+    niri msg action switch-layout 0 >/dev/null 2>&1 || true
+  fi
+fi
 exit 0
