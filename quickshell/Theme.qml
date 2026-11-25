@@ -37,8 +37,52 @@ Singleton {
     readonly property color muted:  p.muted
     readonly property color rule:   p.rule
 
+    // ── cover colours: loaded from assets/covers.tsv (shared with the shell scripts) ──
+    property var coverMap: ({})                  // name -> { light, dark, label }
+    property var coverNames: new Array()         // in file order
+
+    function parseCovers(txt) {
+        const map = ({});
+        const names = new Array();
+        const lines = String(txt).split("\n");
+        for (let i = 0; i < lines.length; i++) {
+            const l = lines[i];
+            if (l.length === 0 || l.charAt(0) === "#") continue;
+            const c = l.split("\t");
+            if (c.length < 3) continue;
+            map[c[0]] = { light: "#" + c[1], dark: "#" + c[2], label: c.length > 3 ? c[3] : c[0] };
+            names.push(c[0]);
+        }
+        return { map: map, names: names };
+    }
+    function loadCovers() {
+        try {
+            const r = parseCovers(coversFile.text());
+            coverMap = r.map;
+            coverNames = r.names;
+        } catch (e) {
+            console.log("covers.tsv: " + e);
+        }
+    }
+    // colour of a cover name in the current mode (unknown names, "mix" and the old "red" fall back to sky)
+    function coverHex(name) {
+        const c = coverMap[name];
+        return c ? (dark ? c.dark : c.light) : p.sky;
+    }
+
+    FileView {
+        id: coversFile
+        path: Quickshell.shellDir + "/assets/covers.tsv"
+        blockLoading: true
+        printErrors: false
+        watchChanges: true
+        onFileChanged: reload()
+        onLoaded: root.loadCovers()
+    }
+    Component.onCompleted: loadCovers()
+
     // Active cover colour chosen in Settings > Look. Follows paper / ink.
-    readonly property color cover:  Prefs.cover === "mix" ? p.sky : (p[Prefs.cover] || p.sky)
+    readonly property color cover:  Prefs.cover === "mix" ? p.sky : coverHex(Prefs.cover)
 
     readonly property color sky:    p.sky
     readonly property color ochre:  p.ochre
@@ -58,17 +102,24 @@ Singleton {
 
     // ── cursor theme to use for the current mode ────────────
     readonly property string cursorTheme: "rice-" + (dark ? "ink" : "paper") + "-" +
-        (new Array("indigo", "ochre", "pine", "plum", "umber", "mint", "sakura", "sand").indexOf(Prefs.cover) >= 0 ? Prefs.cover : "sky")
+        (coverMap[Prefs.cover] !== undefined ? Prefs.cover : "sky")
 
     // ── gsetting sync ───────────────────────────────────────
     function apply(toDark) {
         dark = toDark;
         setter.exec(new Array("gsettings", "set", "org.gnome.desktop.interface", "color-scheme",
                      toDark ? "prefer-dark" : "prefer-light"));
-        syncApps(toDark);
+        syncNow(toDark);
     }
+    // runs rice-theme right away (rice-theme serialises itself with flock)
+    function syncNow(toDark) {
+        const c = String(Prefs.cover).replace(/[^a-z0-9_-]/g, "");
+        Quickshell.execDetached(new Array("sh", "-c", '"$HOME/.local/bin/rice-theme" ' + (toDark ? "dark" : "light") + " " + c));
+    }
+    // debounced: use this for cover clicks so clicking through the swatches runs rice-theme only once
     function syncApps(toDark) {
-        Quickshell.execDetached(new Array("sh", "-c", '"$HOME/.local/bin/rice-theme" ' + (toDark ? "dark" : "light") + " " + Prefs.cover));
+        syncTimer.targetDark = toDark;
+        syncTimer.restart();
     }
     function toggle(ox, oy, screenName) {
         const nextDark = !dark;
@@ -81,6 +132,12 @@ Singleton {
         PageTurn.start(nextDark, ox, oy, screenName);
     }
 
+    Timer {
+        id: syncTimer
+        property bool targetDark: false
+        interval: 250
+        onTriggered: root.syncNow(targetDark)
+    }
     Timer {
         id: fallbackTimer
         property bool targetDark: false

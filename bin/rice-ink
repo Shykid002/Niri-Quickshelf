@@ -12,18 +12,22 @@ Controls while running:
 import curses, math, os, random, subprocess, time
 from operator import itemgetter
 
-COVERS = {
-    "sky":    ("#7DCFFF", "#7DCFFF"),
-    "mix":    ("#7DCFFF", "#7DCFFF"),
-    "indigo": ("#2C3E60", "#6D84AF"),
-    "ochre":  ("#CF9C42", "#D7AD59"),
-    "pine":   ("#486455", "#7C9987"),
-    "plum":   ("#7D3B56", "#C47A98"),
-    "umber":  ("#6B4C3B", "#B58E79"),
-    "mint":   ("#A6E3A1", "#A6E3A1"),
-    "sakura": ("#F5C2E7", "#F5C2E7"),
-    "sand":   ("#E1D2B0", "#E1D2B0"),
-}
+def load_covers():
+    """name -> (light, dark) from quickshell/assets/covers.tsv (the one shared cover list)."""
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "quickshell", "assets", "covers.tsv")
+    out = dict()
+    try:
+        with open(path, encoding="utf-8") as fp:
+            for line in fp:
+                c = line.rstrip("\n").split("\t")
+                if len(c) >= 3 and not line.startswith("#"):
+                    out[c[0]] = ("#" + c[1].lstrip("#"), "#" + c[2].lstrip("#"))
+    except OSError:
+        pass
+    out.setdefault("sky", ("#7DCFFF", "#7DCFFF"))
+    return out
+
+COVERS = load_covers()
 
 GLYPHS = tuple("日月火水木金土山川田人手口目耳心道風雲雨雪花鳥月影墨紙書詩文ⅠⅤⅩⅬⅭⅮⅯ§¶▪◆•")
 PIPES_MAP = {

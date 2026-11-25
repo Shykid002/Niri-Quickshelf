@@ -14,13 +14,13 @@ if [ -d "$here/fonts" ] && ls "$here"/fonts/*.{ttf,otf} >/dev/null 2>&1; then
   fc-cache -f "$HOME/.local/share/fonts/rice"
 fi
 
-# cursors (regenerate if missing)
-[ -d "$here/cursors/rice-paper-plum" ] || python3 "$here/bin/gen-cursors.py" "$here/cursors"
+# cursors: always regenerate, so new colours in quickshell/assets/covers.tsv get their cursor themes
+python3 "$here/bin/gen-cursors.py" "$here/cursors" >/dev/null
 rm -f "$HOME/.local/share/icons/rice-ink-dark" "$HOME/.local/share/icons/rice-ink-light"   # old names
 for d in "$here"/cursors/rice-*; do link "$d" "$HOME/.local/share/icons/$(basename "$d")"; done
 
 # theme hook, called by the shell on every theme change
-chmod +x "$here"/bin/rice-* 2>/dev/null || true
+chmod +x "$here"/bin/rice-* "$here"/bin/gen-cursors.py 2>/dev/null || true
 link "$here/bin/rice-theme" "$HOME/.local/bin/rice-theme"
 "$here/bin/rice-theme" "$(gsettings get org.gnome.desktop.interface color-scheme | grep -q dark && echo dark || echo light)"
 
@@ -72,7 +72,6 @@ done
 link "$here/bin/rice-firefox" "$HOME/.local/bin/rice-firefox"
 link "$here/bin/rice-icons"   "$HOME/.local/bin/rice-icons"
 "$here/bin/rice-firefox" install
-link "$here/bin/rice-icons"   "$HOME/.local/bin/rice-icons"
 
 # terminal tools
 for f in "$here"/fish/functions/*.fish; do link "$f" "$HOME/.config/fish/functions/$(basename "$f")"; done
@@ -110,4 +109,3 @@ command -v cava >/dev/null || echo "NOTE: cava is not installed, so the music wi
 command -v qs >/dev/null || echo "WARNING: quickshell (qs) is not installed"
 command -v starship >/dev/null && echo "NOTE: starship is installed."
 echo "start the shell by hand with:  qs -c rice. "
-

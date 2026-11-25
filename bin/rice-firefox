@@ -4,18 +4,15 @@
 root="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 cmd="${1:-install}"
 cover="${2:-sky}"
+tsv="$root/quickshell/assets/covers.tsv"
 
-case $cover in
-  indigo) l=2C3E60; d=6D84AF;;
-  ochre)  l=CF9C42; d=D7AD59;;
-  pine)   l=486455; d=7C9987;;
-  plum)   l=7D3B56; d=C47A98;;
-  umber)  l=6B4C3B; d=B58E79;;
-  mint)   l=A6E3A1; d=A6E3A1;;
-  sakura) l=F5C2E7; d=F5C2E7;;
-  sand)   l=E1D2B0; d=E1D2B0;;
-  *)      l=7DCFFF; d=7DCFFF;;
-esac
+# covers.tsv: name <tab> light <tab> dark
+row() { [ -f "$tsv" ] && awk -F'\t' -v n="$1" '$1 !~ /^#/ && $1 == n { print $2 " " $3; exit }' "$tsv"; }
+vals="$(row "$cover")"
+[ -n "$vals" ] || vals="$(row sky)"
+[ -n "$vals" ] || vals="7DCFFF 7DCFFF"
+set -- $vals
+l=$1; d=$2
 
 profiles() {
   for base in "$HOME/.config/mozilla/firefox" "$HOME/.mozilla/firefox" "$HOME/.var/app/org.mozilla.firefox/.mozilla/firefox" "$HOME/snap/firefox/common/.mozilla/firefox"; do

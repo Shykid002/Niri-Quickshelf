@@ -3,18 +3,26 @@
 import os, struct, sys
 
 SIZES = (24, 32, 48, 64)
-def rgb(h): return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
-COVERS = {
-    "sky":    ("7DCFFF", "7DCFFF"),
-    "indigo": ("2C3E60", "6D84AF"),
-    "ochre":  ("CF9C42", "D7AD59"),
-    "pine":   ("486455", "7C9987"),
-    "plum":   ("7D3B56", "C47A98"),
-    "umber":  ("6B4C3B", "B58E79"),
-    "mint":   ("A6E3A1", "A6E3A1"),
-    "sakura": ("F5C2E7", "F5C2E7"),
-    "sand":   ("E1D2B0", "E1D2B0"),
-}
+def rgb(h):
+    h = h.lstrip("#")
+    return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+
+def load_covers():
+    """name -> (light, dark) from quickshell/assets/covers.tsv (the one shared cover list)."""
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "quickshell", "assets", "covers.tsv")
+    out = dict()
+    try:
+        with open(path, encoding="utf-8") as fp:
+            for line in fp:
+                c = line.rstrip("\n").split("\t")
+                if len(c) >= 3 and not line.startswith("#"):
+                    out[c[0]] = (c[1], c[2])
+    except OSError:
+        pass
+    out.setdefault("sky", ("7DCFFF", "7DCFFF"))
+    return out
+
+COVERS = load_covers()
 THEMES = {}
 for _n, (_p, _i) in COVERS.items():
     THEMES["rice-paper-" + _n] = {"ink": (0x1D, 0x1C, 0x1A), "red": rgb(_p)}
@@ -114,7 +122,7 @@ BASE = {"left_ptr": arrow, "pointer": reticle, "held": held, "text": ibeam, "cro
 
 def main():
     it = iter(sys.argv); next(it, None)
-    out = next(it, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "cursors"))
+    out = next(it, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "cursors"))
     for name, c in THEMES.items():
         d = os.path.join(out, name, "cursors"); os.makedirs(d, exist_ok=True)
         for base, fn in BASE.items():

@@ -1,8 +1,15 @@
 #!/bin/sh
 # rice-theme dark|light [cover] : flip everything outside the shell (cursor, niri, kitty, fastfetch, GTK, Qt, Icons, Firefox).
-# cover = sky|indigo|ochre|pine|plum|umber|mint|sakura|sand|mix
+# cover = any name in quickshell/assets/covers.tsv, or mix (unknown names fall back to sky)
 mode="${1:-light}"
 mkdir -p "$HOME/.cache"
+
+# one run at a time: rapid cover clicks queue up instead of racing on Rice-A/B and the icon theme
+if command -v flock >/dev/null 2>&1; then
+  exec 9>"$HOME/.cache/rice-theme.lock"
+  flock 9
+fi
+
 if [ -n "${2:-}" ]; then
   cover="$2"
   printf '%s' "$cover" > "$HOME/.cache/rice-cover"
@@ -12,45 +19,34 @@ else
   cover="sky"
 fi
 
-if [ "$mode" = dark ]; then
-  case $cover in
-    indigo) hex=6D84AF;;
-    ochre)  hex=D7AD59;;
-    pine)   hex=7C9987;;
-    plum)   hex=C47A98;;
-    umber)  hex=B58E79;;
-    mint)   hex=A6E3A1;;
-    sakura) hex=F5C2E7;;
-    sand)   hex=E1D2B0;;
-    *)      hex=7DCFFF;;
-  esac
-else
-  case $cover in
-    indigo) hex=2C3E60;;
-    ochre)  hex=CF9C42;;
-    pine)   hex=486455;;
-    plum)   hex=7D3B56;;
-    umber)  hex=6B4C3B;;
-    mint)   hex=A6E3A1;;
-    sakura) hex=F5C2E7;;
-    sand)   hex=E1D2B0;;
-    *)      hex=7DCFFF;;
-  esac
-fi
+root="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+tsv="$root/quickshell/assets/covers.tsv"
 
+# covers.tsv: name <tab> light <tab> dark <tab> label <tab> gnome-accent
+row() { [ -f "$tsv" ] && awk -F'\t' -v n="$1" '$1 !~ /^#/ && $1 == n { print $2 " " $3 " " $5; exit }' "$tsv"; }
+vals="$(row "$cover")"
+if [ -n "$vals" ]; then ckey="$cover"; else ckey=sky; vals="$(row sky)"; fi
+[ -n "$vals" ] || vals="7DCFFF 7DCFFF teal"
+set -- $vals
+lhex=$1; dhex=$2; gaccent=$3
+
+if [ "$mode" = dark ]; then hex=$dhex; else hex=$lhex; fi
+if [ "$mode" = dark ]; then name=ink; else name=paper; fi
+
+r=$(printf '%d' 0x$(echo "$hex" | cut -c1-2))
+g=$(printf '%d' 0x$(echo "$hex" | cut -c3-4))
+b=$(printf '%d' 0x$(echo "$hex" | cut -c5-6))
+rgb="$r;$g;$b"
+
+# text colour on top of the cover: the one with better contrast (same rule as rice-icons)
 if [ "$mode" = dark ]; then
   fg=171619
 else
-  case $cover in
-    ochre|sky|mint|sakura|sand|mix|red) fg=1D1C1A;;
-    *) fg=EEEAE1;;
-  esac
+  tone="$(awk -v r="$r" -v g="$g" -v b="$b" 'function lin(c){c/=255; return c<=0.03928 ? c/12.92 : ((c+0.055)/1.055)^2.4}
+          BEGIN{ L=0.2126*lin(r)+0.7152*lin(g)+0.0722*lin(b); print (L>0.179) ? "dark" : "light" }')"
+  if [ "$tone" = dark ]; then fg=1D1C1A; else fg=EEEAE1; fi
 fi
 
-rgb="$(printf '%d;%d;%d' 0x$(echo "$hex" | cut -c1-2) 0x$(echo "$hex" | cut -c3-4) 0x$(echo "$hex" | cut -c5-6))"
-root="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
-if [ "$mode" = dark ]; then name=ink; else name=paper; fi
-case $cover in indigo|ochre|pine|plum|umber|mint|sakura|sand) ckey=$cover;; *) ckey=sky;; esac
 cursor="rice-$name-$ckey"
 
 mkdir -p "$HOME/.config/niri"
@@ -135,7 +131,8 @@ XEOF
 if pgrep -x xsettingsd >/dev/null 2>&1; then
   pkill -HUP -x xsettingsd 2>/dev/null
 elif command -v xsettingsd >/dev/null 2>&1; then
-  nohup xsettingsd >/dev/null 2>&1 &
+  # 9>&- so the long-lived daemon does not inherit (and hold) the lock
+  nohup xsettingsd >/dev/null 2>&1 9>&- &
 fi
 
 # Qt
@@ -159,16 +156,8 @@ if "$root/bin/rice-icons" "$cover" "$mode" >/dev/null 2>&1; then
   done
 fi
 
-# Firefox (live Paper/Ink via color-scheme + live cover accent via accent-color)
-case $cover in
-  indigo) gaccent=blue;;
-  ochre|sand) gaccent=yellow;;
-  pine|mint) gaccent=green;;
-  plum) gaccent=purple;;
-  umber) gaccent=orange;;
-  sakura) gaccent=pink;;
-  *) gaccent=teal;;
-esac
+# Firefox: the chrome follows the GTK selection colour (exact cover hex via accent_bg_color),
+# the GNOME accent below is only the nearest-name fallback for apps that read the portal accent.
 gsettings set org.gnome.desktop.interface accent-color "$gaccent" 2>/dev/null
 "$root/bin/rice-firefox" cover "$cover" >/dev/null 2>&1
 
@@ -182,4 +171,3 @@ gsettings set org.gnome.desktop.interface cursor-theme "$cursor" 2>/dev/null
 gsettings set org.gnome.desktop.interface cursor-size 24 2>/dev/null
 [ -n "$NIRI_SOCKET" ] && niri msg action load-config-file >/dev/null 2>&1
 exit 0
-

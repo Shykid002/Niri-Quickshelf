@@ -1,0 +1,32 @@
+# THE one list of cover colours. Tab separated, hex without '#'.
+# name	light	dark	label	gnome-accent (blue teal green yellow orange red pink purple slate)
+# Read by Theme.qml, rice-theme, rice-firefox, rice-icons, rice-ink, gen-cursors.py. After adding a row run gen-cursors.py.
+sky	7DCFFF	7DCFFF	Sky	teal
+indigo	2C3E60	6D84AF	Indigo	blue
+ochre	CF9C42	D7AD59	Ochre	yellow
+pine	486455	7C9987	Pine	green
+plum	75334F	C16B91	Plum	purple
+umber	594438	A98A78	Umber	orange
+mint	A6E3A1	A6E3A1	Mint	green
+sakura	F5C2E7	F5C2E7	Sakura	pink
+sand	DCC5A0	C8B18D	Sand	yellow
+claret	9B303B	E06A72	Claret	red
+rose	C0647E	E394AB	Rose	pink
+coral	E77B79	F4A09A	Coral	red
+rust	A34416	D17A48	Rust	orange
+persimmon	D66B24	F29A55	Persimmon	orange
+caramel	CE9463	F9C193	Caramel	orange
+butter	F0D36B	E8C75C	Butter	yellow
+bronze	605512	8A7C40	Bronze	yellow
+moss	657B32	A0B86B	Moss	green
+sage	8CA99A	B6C9BD	Sage	green
+forest	036325	448B50	Forest	green
+jade	107C5B	52A585	Jade	green
+turquoise	2FD2B2	65E7C9	Turquoise	teal
+teal	2F7A78	6FBDB8	Teal	teal
+cyan	36CDE2	6BE2F5	Cyan	teal
+denim	4169A8	8BA9DF	Denim	blue
+lavender	9580D5	B7A6F0	Lavender	purple
+violet	5E3F8F	9F85D0	Violet	purple
+orchid	BB70A8	E19ACB	Orchid	pink
+slate	66717D	A2ADB8	Slate	slate

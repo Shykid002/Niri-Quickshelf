@@ -3,20 +3,31 @@
 import configparser, os, re, shutil, subprocess, sys
 from operator import itemgetter
 
-PALETTE = {
-    "sky":    ("#7DCFFF", "#7DCFFF"),
-    "mix":    ("#7DCFFF", "#7DCFFF"),
-    "indigo": ("#2C3E60", "#6D84AF"),
-    "ochre":  ("#CF9C42", "#D7AD59"),
-    "pine":   ("#486455", "#7C9987"),
-    "plum":   ("#7D3B56", "#C47A98"),
-    "umber":  ("#6B4C3B", "#B58E79"),
-    "mint":   ("#A6E3A1", "#A6E3A1"),
-    "sakura": ("#F5C2E7", "#F5C2E7"),
-    "sand":   ("#E1D2B0", "#E1D2B0"),
-}
+def load_covers():
+    """name -> (light, dark) from quickshell/assets/covers.tsv (the one shared cover list)."""
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "quickshell", "assets", "covers.tsv")
+    out = dict()
+    try:
+        with open(path, encoding="utf-8") as fp:
+            for line in fp:
+                c = line.rstrip("\n").split("\t")
+                if len(c) >= 3 and not line.startswith("#"):
+                    out[c[0]] = ("#" + c[1].lstrip("#"), "#" + c[2].lstrip("#"))
+    except OSError:
+        pass
+    out.setdefault("sky", ("#7DCFFF", "#7DCFFF"))
+    return out
 
-LIGHT_PASTELS = {"sky", "mix", "ochre", "mint", "sakura", "sand"}
+PALETTE = load_covers()
+
+def is_light(h):
+    """True when dark text reads better on this colour (same rule as rice-theme)."""
+    h = h.lstrip("#")
+    def lin(v):
+        v = v / 255
+        return v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4
+    r, g, b = (lin(int(h[i:i + 2], 16)) for i in (0, 2, 4))
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.179
 
 def adjust_hex(h, factor):
     h = h.lstrip("#")
@@ -33,7 +44,7 @@ mode  = next(it, "light").lower()
 light_hex, dark_hex = PALETTE.get(cover, PALETTE.get("sky"))
 body_hex = dark_hex if mode == "dark" else light_hex
 tab_hex  = adjust_hex(body_hex, 0.80)
-emblem_hex = "#171619" if (mode == "dark" or cover in LIGHT_PASTELS) else "#EEEAE1"
+emblem_hex = "#171619" if (mode == "dark" or is_light(body_hex)) else "#EEEAE1"
 
 search = os.environ.get("RICE_ICON_DIRS", "/usr/share/icons:" + os.path.expanduser("~/.local/share/icons")).split(":")
 out = os.path.join(os.path.expanduser(os.environ.get("RICE_ICON_OUT", "~/.local/share/icons")), "Rice-Papirus")
