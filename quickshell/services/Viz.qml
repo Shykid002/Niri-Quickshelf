@@ -4,15 +4,15 @@ import Quickshell
 import Quickshell.Io
 import qs.services
 
-// The music window's spectrum. Real data from `cava` (sudo pacman -S cava) while the window is open and
-// music is playing; a gentle simulated spectrum when cava is not installed. Peaks fall slowly.
+// The music window's spectrum. Real data from `cava` (sudo pacman -S cava) while the window is open (or the cursor's
+// music ring is on) and music is playing; a gentle simulated spectrum when cava is not installed. Peaks fall slowly.
 Singleton {
     id: root
     readonly property int count: 40
     property var bars: []
     property var peaks: []
     property bool hasCava: false
-    readonly property bool wanted: Music.open && Music.playing
+    readonly property bool wanted: Music.playing && (Music.open || Prefs.musicRing)
 
     function push(a) {
         const b = [], pk = [];
@@ -31,7 +31,7 @@ Singleton {
     }
     Process {
         command: ["cava", "-p", Quickshell.shellDir + "/assets/cava.conf"]
-        running: root.hasCava && root.wanted                     // starts and stops with the window and the music
+        running: root.hasCava && root.wanted                     // starts and stops with the window / ring and the music
         stdout: SplitParser {
             onRead: data => {
                 const a = [];

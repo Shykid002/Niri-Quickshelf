@@ -3,43 +3,44 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
+// Persistent settings, stored in ~/.config/rice/settings.json. The Settings window edits these.
 Singleton {
     id: root
 
+    // Quiet: no sounds (except the timer alarm) and no automatic reveal of new notifications.
     property alias quiet: ad.quiet
-    property alias wallpaperPaper: ad.wallpaperPaper
+    property alias wallpaperPaper: ad.wallpaperPaper    // 0..4, chosen with the bar's wallpaper button
     property alias wallpaperInk: ad.wallpaperInk
 
     // Look
-    property alias themeChange: ad.themeChange
-    property alias cover: ad.cover
-    property alias coverScales: ad.coverScales
-    property alias verse: ad.verse
-    property alias motion: ad.motion
-
-    // Windows / Input / Cursor / Terminal
-    property alias gaps: ad.gaps
-    property alias border: ad.border
-    property alias kbLayout: ad.kbLayout                // "us" | "ara"
-    property alias focusFollowsMouse: ad.focusFollowsMouse
+    property alias themeChange: ad.themeChange          // "held" | "leaf" | "ink" | "none"
+    property alias cover: ad.cover                      // "mix" or any name in assets/covers.tsv
+    property alias coverScales: ad.coverScales          // wallpaper cover scales with screen height
+    property alias verse: ad.verse                      // show the verse on the wallpaper
+    property alias motion: ad.motion                    // "quick" | "usual" | "slow"
+    // Windows / Input / Terminal  ("" = not set by the rice, niri/Ghostty keep their own)
+    property alias gaps: ad.gaps                        // "none" | "small" | "usual"
+    property alias border: ad.border                    // "thin" | "usual" | "thick"
     property alias tap: ad.tap
     property alias natural: ad.natural
-    property alias dwt: ad.dwt
+    property alias focusFollowsMouse: ad.focusFollowsMouse        // niri focus-follows-mouse
+    property alias dwt: ad.dwt                          // touchpad: disable while typing
+    property alias kbLayout: ad.kbLayout                    // keyboard layout: "us" | "ara"
     property alias cursorStyle: ad.cursorStyle          // "box" | "curly" | "ring"
     property alias cursorSize: ad.cursorSize            // 20 | 24 | 28 | 32
-    property alias cursorTrail: ad.cursorTrail          // "off" | "comet" | "sparks"
-    property alias musicRing: ad.musicRing
-    property alias fontSize: ad.fontSize
-
+    property alias cursorTrail: ad.cursorTrail          // "off" | "comet" | "sparks"   (CursorFxLayer)
+    property alias musicRing: ad.musicRing              // spectrum ring around the pointer while music plays
+    property alias fontSize: ad.fontSize                // "small" | "usual" | "large"
     // Session
-    property alias lockMinutes: ad.lockMinutes
+    property alias lockMinutes: ad.lockMinutes          // 0 = never
     property alias confirmPower: ad.confirmPower
+    // Power profile "Ultra-Saver" (power-saver + dim screen) and the brightness to go back to
     property alias ultraSaver: ad.ultraSaver
     property alias ultraRestore: ad.ultraRestore
 
     readonly property real speed: motion === "quick" ? 0.6 : motion === "slow" ? 1.6 : 1.0
 
-    Process { command: new Array("mkdir", "-p", Quickshell.env("HOME") + "/.config/rice"); running: true }
+    Process { command: ["mkdir", "-p", Quickshell.env("HOME") + "/.config/rice"]; running: true }
 
     FileView {
         path: Quickshell.env("HOME") + "/.config/rice/settings.json"
@@ -51,7 +52,7 @@ Singleton {
         adapter: JsonAdapter {
             id: ad
             property string themeChange: "held"
-            property string cover: "sky"
+            property string cover: "red"
             property bool quiet: false
             property int wallpaperPaper: 0
             property int wallpaperInk: 0
@@ -60,11 +61,11 @@ Singleton {
             property string motion: "usual"
             property string gaps: ""
             property string border: ""
-            property string kbLayout: "us"
-            property bool focusFollowsMouse: false
             property bool tap: true
             property bool natural: true
+            property bool focusFollowsMouse: false
             property bool dwt: true
+            property string kbLayout: "us"
             property string cursorStyle: "box"
             property int cursorSize: 24
             property string cursorTrail: "off"
